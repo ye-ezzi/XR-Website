@@ -19,9 +19,9 @@ class ModelViewer {
     }
 
     init() {
-        // Scene 설정
+        // Scene 설정 (투명 배경으로 설정해 뒤의 홈 이미지가 보이도록 함)
         this.scene = new THREE.Scene();
-        this.scene.background = new THREE.Color(0x1a1a1a); // 진한 회색 배경
+        this.scene.background = null;
 
         // Orthographic 카메라 설정 (원근 왜곡 없음)
         const aspect = window.innerWidth / window.innerHeight;
@@ -33,40 +33,32 @@ class ModelViewer {
             0.01,
             2000
         );
-        this.camera.position.set(0, 0, 10); // 거리와 무관, 방향만 필요
+        this.camera.position.set(0, 0, 10);
         this.camera.lookAt(0, 0, 0);
 
-        // Renderer 설정
-        this.renderer = new THREE.WebGLRenderer({ antialias: true });
+        // Renderer 설정 (알파 활성화, 클리어 알파 0)
+        this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
         this.renderer.setSize(window.innerWidth, window.innerHeight);
-        // HiDPI 디스플레이에서 선명도 개선
         this.renderer.setPixelRatio(Math.min(2, window.devicePixelRatio || 1));
         this.renderer.shadowMap.enabled = true;
         this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
         this.renderer.outputColorSpace = THREE.SRGBColorSpace;
         this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
-        this.renderer.toneMappingExposure = 1.05; // 약간 밝게
-        this.renderer.physicallyCorrectLights = true; // 조명 물리 정확도 개선
+        this.renderer.toneMappingExposure = 1.05;
+        this.renderer.physicallyCorrectLights = true;
+        this.renderer.setClearAlpha(0);
 
-        // Viewer 컨테이너에 렌더러 추가
         const viewerContainer = document.getElementById('viewer');
         viewerContainer.appendChild(this.renderer.domElement);
 
-        // 마우스 이벤트 설정 (모델 회전 전용)
         this.setupMouseControls();
-
-        // 조명 설정
         this.setupLighting();
-
-        // 시작하기 버튼 바인딩
         this.setupStartButton();
 
-        // 윈도우 리사이즈 이벤트
         window.addEventListener('resize', () => {
             this.onWindowResize();
         });
 
-        // 애니메이션 루프 시작
         this.animate();
     }
 
@@ -74,6 +66,18 @@ class ModelViewer {
         const btn = document.getElementById('startButton');
         if (!btn) return;
         btn.addEventListener('click', () => {
+            // 라인/텍스트 즉시 숨김
+            const layer = document.getElementById('annoLayer');
+            const line1Img = document.getElementById('line1Img');
+            const line2Img = document.getElementById('line2Img');
+            const t1 = document.getElementById('line1Text');
+            const t2 = document.getElementById('line2Text');
+            if (layer) layer.classList.remove('visible');
+            if (line1Img) line1Img.classList.remove('visible');
+            if (line2Img) line2Img.classList.remove('visible');
+            if (t1) t1.textContent = '';
+            if (t2) t2.textContent = '';
+
             if (!this.model || this.isAnimating) return;
             this.playStartSequence();
         });
@@ -140,10 +144,20 @@ class ModelViewer {
             if (rProgress < 1 || fProgress < 1) {
                 requestAnimationFrame(step);
             } else {
-                // 끝 처리: 완전히 투명화 후 숨김
                 if (this.model) this.model.visible = false;
                 this.isAnimating = false;
                 if (btn) btn.style.display = 'none';
+                // 홈 이미지는 모델 페이드 완료 후 0.5초 대기 뒤 페이드인
+                const homeImage = document.getElementById('homeImage');
+                if (homeImage) {
+                    setTimeout(() => {
+                        homeImage.classList.add('visible');
+                        // 홈 이미지가 보인 뒤 1초 대기 후 3D 모델 재등장 (홈 이미지는 유지)
+                        setTimeout(() => {
+                            this.revealModelOverHome();
+                        }, 1000);
+                    }, 500); // 0.5s 유지 후 노출
+                }
             }
         };
 
@@ -340,12 +354,15 @@ class ModelViewer {
                 }
 
                 document.getElementById('loading').classList.add('hidden');
+                // 모델 등장 후 안내 라인/텍스트 인터랙션 실행
+                this.runAnnotations();
             },
             undefined,
             (error) => {
                 console.error('Error loading GLB file:', error);
                 document.getElementById('loading').classList.add('hidden');
                 this.createDefaultModel();
+                this.runAnnotations();
             }
         );
     }
@@ -401,6 +418,108 @@ class ModelViewer {
         const delta = this.clock.getDelta();
         if (this.updateAnimation) this.updateAnimation(delta);
         this.renderer.render(this.scene, this.camera);
+    }
+
+    runAnnotations() {
+        const layer = document.getElementById('annoLayer');
+        const line1Img = document.getElementById('line1Img');
+        const line2Img = document.getElementById('line2Img');
+        const t1 = document.getElementById('line1Text');
+        const t2 = document.getElementById('line2Text');
+        const btn = document.getElementById('startButton');
+        if (!layer || !line1Img || !line2Img || !t1 || !t2 || !btn) return;
+
+        const text1 = '날짜, 시간, 배터리 상태는 필수 정보이며, 접근성을 위해 오른쪽 상단에 위치합니다.';
+        const text2 = '시작 화면에서 사용자는 알림 및 추천 작업과 같은 중요한 활동을 확인할 수 있습니다.';
+
+        const typeWriter = (el, text, speed = 18) => new Promise((resolve) => {
+            el.textContent = '';
+            el.classList.add('typing-caret');
+            let i = 0;
+            const tick = () => {
+                el.textContent = text.slice(0, i);
+                i += 1;
+                if (i <= text.length) {
+                    setTimeout(tick, speed);
+                } else {
+                    el.classList.remove('typing-caret');
+                    resolve();
+                }
+            };
+            tick();
+        });
+
+        const showPng = (img) => new Promise((resolve) => {
+            img.classList.remove('visible');
+            void img.getBoundingClientRect();
+            img.classList.add('visible');
+            setTimeout(resolve, 400);
+        });
+
+        // 시퀀스: 레이어 보이기 → line1 PNG → text1 → line2 PNG → text2 → 시작하기 버튼 표시
+        layer.classList.add('visible');
+        showPng(line1Img)
+            .then(() => typeWriter(t1, text1))
+            .then(() => showPng(line2Img))
+            .then(() => typeWriter(t2, text2))
+            .then(() => { btn.style.display = 'inline-flex'; });
+
+        window.addEventListener('resize', () => {
+            svg.setAttribute('viewBox', `0 0 100 100`);
+        }, { once: true });
+    }
+
+    revealModelOverHome() {
+        if (!this.model) return;
+
+        // 페이드 대상 재질 확보
+        let items = this.fadeMaterials && this.fadeMaterials.length ? this.fadeMaterials : [];
+        if (items.length === 0) {
+            const materialSet = new Set();
+            this.model.traverse((child) => {
+                if (child.isMesh && child.material) {
+                    const mats = Array.isArray(child.material) ? child.material : [child.material];
+                    mats.forEach((m) => materialSet.add(m));
+                }
+            });
+            items = Array.from(materialSet).map((m) => ({
+                mat: m,
+                transparent: m.transparent === true,
+                opacity: m.opacity !== undefined ? m.opacity : 1,
+                depthWrite: m.depthWrite !== undefined ? m.depthWrite : true,
+            }));
+            this.fadeMaterials = items;
+        }
+
+        // 시작 상태: 모두 0으로 두고 부드럽게 원래 불투명도로
+        this.model.visible = true;
+        items.forEach(({ mat }) => {
+            if (mat.opacity === undefined) mat.opacity = 1;
+            mat.transparent = true;
+            mat.depthWrite = false;
+            mat.opacity = 0;
+            mat.needsUpdate = true;
+        });
+
+        const duration = 800;
+        const start = performance.now();
+        const animate = () => {
+            const now = performance.now();
+            const t = Math.min(1, (now - start) / duration);
+            items.forEach(({ mat, opacity }) => {
+                mat.opacity = opacity * t;
+            });
+            if (t < 1) {
+                requestAnimationFrame(animate);
+            } else {
+                // depthWrite 원복
+                items.forEach(({ mat, depthWrite }) => {
+                    mat.depthWrite = depthWrite;
+                    mat.needsUpdate = true;
+                });
+            }
+        };
+        requestAnimationFrame(animate);
     }
 }
 
