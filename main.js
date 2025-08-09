@@ -11,6 +11,8 @@ class ModelViewer {
         this.rotationSpeed = 0.01; // 모델 회전 속도 (사용자 드래그 전용)
         this.frustumSize = 10; // Orthographic 기본 높이 (world units)
         this.hideHudPanels = false; // HUD/패널 자동 숨김 스위치
+        this.isAnimating = false; // 시작 버튼 애니메이션 중 여부
+        this.fadeMaterials = []; // 페이드에 사용되는 머티리얼 목록
         
         this.init();
         this.loadGLBModel('/models/glasses_ver2.glb');
@@ -37,6 +39,8 @@ class ModelViewer {
         // Renderer 설정
         this.renderer = new THREE.WebGLRenderer({ antialias: true });
         this.renderer.setSize(window.innerWidth, window.innerHeight);
+        // HiDPI 디스플레이에서 선명도 개선
+        this.renderer.setPixelRatio(Math.min(2, window.devicePixelRatio || 1));
         this.renderer.shadowMap.enabled = true;
         this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
         this.renderer.outputColorSpace = THREE.SRGBColorSpace;
@@ -54,6 +58,9 @@ class ModelViewer {
         // 조명 설정
         this.setupLighting();
 
+        // 시작하기 버튼 바인딩
+        this.setupStartButton();
+
         // 윈도우 리사이즈 이벤트
         window.addEventListener('resize', () => {
             this.onWindowResize();
@@ -63,6 +70,86 @@ class ModelViewer {
         this.animate();
     }
 
+    setupStartButton() {
+        const btn = document.getElementById('startButton');
+        if (!btn) return;
+        btn.addEventListener('click', () => {
+            if (!this.model || this.isAnimating) return;
+            this.playStartSequence();
+        });
+    }
+
+    playStartSequence() {
+        // 버튼 비활성화/페이드 아웃(선택)
+        const btn = document.getElementById('startButton');
+        if (btn) {
+            btn.style.pointerEvents = 'none';
+            btn.style.opacity = '0.6';
+        }
+
+        this.isAnimating = true;
+
+        // 회전 목표: 현재 각도 기준 Y축으로 180도 추가
+        const startY = this.model.rotation.y;
+        const endY = startY + Math.PI;
+        const rotDuration = 1200; // ms
+        const fadeDelay = 1000;   // ms 후 페이드 시작
+        const fadeDuration = 900; // ms
+        const startTime = performance.now();
+
+        // 페이드 대상 머티리얼 수집(중복 제거)
+        const materialSet = new Set();
+        this.model.traverse((child) => {
+            if (child.isMesh && child.material) {
+                const materials = Array.isArray(child.material) ? child.material : [child.material];
+                materials.forEach((m) => materialSet.add(m));
+            }
+        });
+        this.fadeMaterials = Array.from(materialSet).map((m) => ({
+            mat: m,
+            transparent: m.transparent === true,
+            opacity: m.opacity !== undefined ? m.opacity : 1,
+            depthWrite: m.depthWrite !== undefined ? m.depthWrite : true,
+        }));
+        // 페이드 전처리: 투명 처리 및 depthWrite off로 겹침 뿌연 현상 최소화
+        this.fadeMaterials.forEach(({ mat }) => {
+            if (mat.opacity === undefined) mat.opacity = 1;
+            mat.transparent = true;
+            mat.depthWrite = false;
+            mat.needsUpdate = true;
+        });
+
+        const easeInOut = (t) => t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
+
+        const step = () => {
+            const now = performance.now();
+            const elapsed = now - startTime;
+
+            // 회전 보간
+            const rProgress = Math.min(1, elapsed / rotDuration);
+            const rEased = easeInOut(rProgress);
+            this.model.rotation.y = startY + (endY - startY) * rEased;
+
+            // 페이드 보간
+            const fProgress = Math.min(1, Math.max(0, (elapsed - fadeDelay) / fadeDuration));
+            const f = fProgress; // 0 -> 1
+            this.fadeMaterials.forEach(({ mat, opacity }) => {
+                mat.opacity = (1 - f) * opacity;
+            });
+
+            if (rProgress < 1 || fProgress < 1) {
+                requestAnimationFrame(step);
+            } else {
+                // 끝 처리: 완전히 투명화 후 숨김
+                if (this.model) this.model.visible = false;
+                this.isAnimating = false;
+                if (btn) btn.style.display = 'none';
+            }
+        };
+
+        requestAnimationFrame(step);
+    }
+
     setupMouseControls() {
         let isMouseDown = false;
         let mouseX = 0;
@@ -70,13 +157,16 @@ class ModelViewer {
         let lastMouseX = 0;
         let lastMouseY = 0;
 
+        // 마우스 이벤트 리스너
         this.renderer.domElement.addEventListener('mousedown', (event) => {
+            if (this.isAnimating) return;
             isMouseDown = true;
             lastMouseX = event.clientX;
             lastMouseY = event.clientY;
         });
 
         this.renderer.domElement.addEventListener('mousemove', (event) => {
+            if (this.isAnimating) return;
             if (isMouseDown && this.model) {
                 mouseX = event.clientX;
                 mouseY = event.clientY;
@@ -99,6 +189,7 @@ class ModelViewer {
 
         // 터치 이벤트 (모바일 지원)
         this.renderer.domElement.addEventListener('touchstart', (event) => {
+            if (this.isAnimating) return;
             event.preventDefault();
             isMouseDown = true;
             lastMouseX = event.touches[0].clientX;
@@ -106,6 +197,7 @@ class ModelViewer {
         });
 
         this.renderer.domElement.addEventListener('touchmove', (event) => {
+            if (this.isAnimating) return;
             event.preventDefault();
             if (isMouseDown && this.model) {
                 mouseX = event.touches[0].clientX;
@@ -231,6 +323,7 @@ class ModelViewer {
                             if (mat.metalness !== undefined) mat.metalness = 0.05;
                             mat.transparent = true;
                             mat.opacity = Math.min(mat.opacity ?? 0.9, 0.92);
+                            mat.depthWrite = false; // 투명 물체의 뿌연 오버랩 방지
                         }
                         mat.needsUpdate = true;
                     }

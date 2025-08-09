@@ -12,7 +12,7 @@
         }
 
         body {
-            background: #191919;
+            background: #1a1a1a;
             overflow: hidden;
         }
 
@@ -50,6 +50,33 @@
         .hidden {
             display: none;
         }
+
+        /* 시작하기 버튼 */
+        .start-button {
+            position: absolute;
+            left: 50%;
+            bottom: 100px; /* 하단에서 100px */
+            transform: translateX(-50%);
+            z-index: 200; /* viewer 및 로딩 위로 */
+            padding: 12px 44px; /* 좌우 패딩 +16px */
+            border: 1.5px solid rgba(255,255,255,0.95);
+            background: transparent;
+            color: #fff;
+            font-size: 16px;
+            line-height: 1;
+            border-radius: 999px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            letter-spacing: 0.02em;
+        }
+        .start-button:hover,
+        .start-button:focus-visible {
+            background: rgba(255,255,255,0.1);
+            outline: none;
+        }
+        .start-button:active {
+            transform: translateX(-50%) scale(0.98);
+        }
     </style>
 </head>
 <body>
@@ -58,6 +85,7 @@
         <div class="spinner"></div>
         <div>로딩 중...</div>
     </div>
+    <button class="start-button" id="startButton">시작하기</button>
     <script type="module" src="/main.js"></script>
 </body>
 </html>
