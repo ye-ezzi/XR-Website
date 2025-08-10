@@ -12,6 +12,7 @@ class ModelViewer {
         this.frustumSize = 10; // Orthographic 기본 높이 (world units)
         this.hideHudPanels = false; // HUD/패널 자동 숨김 스위치
         this.isAnimating = false; // 시작 버튼 애니메이션 중 여부
+        this.isPanning = false; // 좌우 이동 중 여부
         this.fadeMaterials = []; // 페이드에 사용되는 머티리얼 목록
         
         this.init();
@@ -164,6 +165,91 @@ class ModelViewer {
         requestAnimationFrame(step);
     }
 
+    revealModelOverHome() {
+        if (!this.model) return;
+
+        // 페이드 대상 재질 확보
+        let items = this.fadeMaterials && this.fadeMaterials.length ? this.fadeMaterials : [];
+        if (items.length === 0) {
+            const materialSet = new Set();
+            this.model.traverse((child) => {
+                if (child.isMesh && child.material) {
+                    const mats = Array.isArray(child.material) ? child.material : [child.material];
+                    mats.forEach((m) => materialSet.add(m));
+                }
+            });
+            items = Array.from(materialSet).map((m) => ({
+                mat: m,
+                transparent: m.transparent === true,
+                opacity: m.opacity !== undefined ? m.opacity : 1,
+                depthWrite: m.depthWrite !== undefined ? m.depthWrite : true,
+            }));
+            this.fadeMaterials = items;
+        }
+
+        // 시작 상태: 모두 0으로 두고 부드럽게 원래 불투명도로
+        this.model.visible = true;
+        items.forEach(({ mat }) => {
+            if (mat.opacity === undefined) mat.opacity = 1;
+            mat.transparent = true;
+            mat.depthWrite = false;
+            mat.opacity = 0;
+            mat.needsUpdate = true;
+        });
+
+        const duration = 800;
+        const start = performance.now();
+        const animate = () => {
+            const now = performance.now();
+            const t = Math.min(1, (now - start) / duration);
+            items.forEach(({ mat, opacity }) => {
+                mat.opacity = opacity * t;
+            });
+            if (t < 1) {
+                requestAnimationFrame(animate);
+            } else {
+                // depthWrite 원복
+                items.forEach(({ mat, depthWrite }) => {
+                    mat.depthWrite = depthWrite;
+                    mat.needsUpdate = true;
+                });
+                // 페이드인 완료 후 좌우 회전 수행
+                this.rotateModelLeftRight();
+            }
+        };
+        requestAnimationFrame(animate);
+    }
+
+    rotateModelLeftRight() {
+        if (!this.model || this.isPanning) return;
+        this.isPanning = true;
+
+        const startY = this.model.rotation.y;
+        const angle = THREE.MathUtils.degToRad(10); // 좌우 10도
+        const leftY = startY - angle;
+        const rightY = startY + angle;
+
+        const easeInOut = (t) => (t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2);
+
+        const rotateTo = (from, to, ms) => new Promise((resolve) => {
+            const t0 = performance.now();
+            const step = () => {
+                const t = Math.min(1, (performance.now() - t0) / ms);
+                const e = easeInOut(t);
+                this.model.rotation.y = from + (to - from) * e;
+                if (t < 1) requestAnimationFrame(step);
+                else resolve();
+            };
+            requestAnimationFrame(step);
+        });
+
+        // 우로 2초 → 좌로 2초 → 중간으로 1초 복귀
+        rotateTo(startY, rightY, 4000)
+            .then(() => rotateTo(rightY, leftY, 4000))
+            .then(() => rotateTo(leftY, startY, 2000))
+            .finally(() => { this.isPanning = false; });
+    }
+
     setupMouseControls() {
         let isMouseDown = false;
         let mouseX = 0;
@@ -173,14 +259,14 @@ class ModelViewer {
 
         // 마우스 이벤트 리스너
         this.renderer.domElement.addEventListener('mousedown', (event) => {
-            if (this.isAnimating) return;
+            if (this.isAnimating || this.isPanning) return;
             isMouseDown = true;
             lastMouseX = event.clientX;
             lastMouseY = event.clientY;
         });
 
         this.renderer.domElement.addEventListener('mousemove', (event) => {
-            if (this.isAnimating) return;
+            if (this.isAnimating || this.isPanning) return;
             if (isMouseDown && this.model) {
                 mouseX = event.clientX;
                 mouseY = event.clientY;
@@ -203,7 +289,7 @@ class ModelViewer {
 
         // 터치 이벤트 (모바일 지원)
         this.renderer.domElement.addEventListener('touchstart', (event) => {
-            if (this.isAnimating) return;
+            if (this.isAnimating || this.isPanning) return;
             event.preventDefault();
             isMouseDown = true;
             lastMouseX = event.touches[0].clientX;
@@ -211,7 +297,7 @@ class ModelViewer {
         });
 
         this.renderer.domElement.addEventListener('touchmove', (event) => {
-            if (this.isAnimating) return;
+            if (this.isAnimating || this.isPanning) return;
             event.preventDefault();
             if (isMouseDown && this.model) {
                 mouseX = event.touches[0].clientX;
@@ -467,59 +553,6 @@ class ModelViewer {
         window.addEventListener('resize', () => {
             svg.setAttribute('viewBox', `0 0 100 100`);
         }, { once: true });
-    }
-
-    revealModelOverHome() {
-        if (!this.model) return;
-
-        // 페이드 대상 재질 확보
-        let items = this.fadeMaterials && this.fadeMaterials.length ? this.fadeMaterials : [];
-        if (items.length === 0) {
-            const materialSet = new Set();
-            this.model.traverse((child) => {
-                if (child.isMesh && child.material) {
-                    const mats = Array.isArray(child.material) ? child.material : [child.material];
-                    mats.forEach((m) => materialSet.add(m));
-                }
-            });
-            items = Array.from(materialSet).map((m) => ({
-                mat: m,
-                transparent: m.transparent === true,
-                opacity: m.opacity !== undefined ? m.opacity : 1,
-                depthWrite: m.depthWrite !== undefined ? m.depthWrite : true,
-            }));
-            this.fadeMaterials = items;
-        }
-
-        // 시작 상태: 모두 0으로 두고 부드럽게 원래 불투명도로
-        this.model.visible = true;
-        items.forEach(({ mat }) => {
-            if (mat.opacity === undefined) mat.opacity = 1;
-            mat.transparent = true;
-            mat.depthWrite = false;
-            mat.opacity = 0;
-            mat.needsUpdate = true;
-        });
-
-        const duration = 800;
-        const start = performance.now();
-        const animate = () => {
-            const now = performance.now();
-            const t = Math.min(1, (now - start) / duration);
-            items.forEach(({ mat, opacity }) => {
-                mat.opacity = opacity * t;
-            });
-            if (t < 1) {
-                requestAnimationFrame(animate);
-            } else {
-                // depthWrite 원복
-                items.forEach(({ mat, depthWrite }) => {
-                    mat.depthWrite = depthWrite;
-                    mat.needsUpdate = true;
-                });
-            }
-        };
-        requestAnimationFrame(animate);
     }
 }
 
