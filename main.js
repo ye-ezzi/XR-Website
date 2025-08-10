@@ -14,6 +14,7 @@ class ModelViewer {
         this.isAnimating = false; // 시작 버튼 애니메이션 중 여부
         this.isPanning = false; // 좌우 이동 중 여부
         this.fadeMaterials = []; // 페이드에 사용되는 머티리얼 목록
+        this.allowUserRotate = false; // 초기에는 사용자 회전 비활성화
         
         this.init();
         this.loadGLBModel('/models/glasses_ver2.glb');
@@ -55,12 +56,27 @@ class ModelViewer {
         this.setupMouseControls();
         this.setupLighting();
         this.setupStartButton();
+        this.setupVisibilityToggle();
 
         window.addEventListener('resize', () => {
             this.onWindowResize();
         });
 
         this.animate();
+    }
+
+    setupVisibilityToggle() {
+        const cb = document.getElementById('modelToggle');
+        if (!cb) return;
+        const apply = (checked) => {
+            if (!this.model) return;
+            this.model.visible = !!checked;
+        };
+        // 초기 상태 반영
+        apply(cb.checked);
+        cb.addEventListener('change', (e) => {
+            apply(e.target.checked);
+        });
     }
 
     setupStartButton() {
@@ -215,9 +231,33 @@ class ModelViewer {
                 });
                 // 페이드인 완료 후 좌우 회전 수행
                 this.rotateModelLeftRight();
+                // 모델이 보이는 단계에서 토글 표시
+                const glass = document.getElementById('glassToggle');
+                if (glass) glass.style.display = 'flex';
             }
         };
         requestAnimationFrame(animate);
+    }
+
+    restoreModelSimple() {
+        if (!this.model) return;
+        this.model.visible = true;
+        // 모델의 모든 머티리얼을 즉시 원복(불투명 1)하여 보이게 함
+        this.model.traverse((child) => {
+            if (child.isMesh) {
+                const mats = Array.isArray(child.material) ? child.material : [child.material];
+                mats.forEach((mat) => {
+                    if (!mat) return;
+                    if (mat.opacity === undefined) mat.opacity = 1;
+                    mat.transparent = true;
+                    mat.opacity = 1;
+                    mat.needsUpdate = true;
+                });
+            }
+        });
+        // 토글 표시
+        const glass = document.getElementById('glassToggle');
+        if (glass) glass.style.display = 'flex';
     }
 
     rotateModelLeftRight() {
@@ -243,11 +283,22 @@ class ModelViewer {
             requestAnimationFrame(step);
         });
 
-        // 우로 2초 → 좌로 2초 → 중간으로 1초 복귀
+        // 우로 4초 → 좌로 4초 → 중간으로 2초 복귀
         rotateTo(startY, rightY, 4000)
             .then(() => rotateTo(rightY, leftY, 4000))
             .then(() => rotateTo(leftY, startY, 2000))
-            .finally(() => { this.isPanning = false; });
+            .finally(() => {
+                this.isPanning = false;
+                // 회전 완료 후 모델 숨김 + 요리 모드 팝업 표시
+                if (this.model) this.model.visible = false;
+                const modal = document.getElementById('cookingModal');
+                if (modal) modal.style.display = 'flex';
+
+                const startBtn = document.getElementById('cookStart');
+                if (startBtn) {
+                    startBtn.onclick = () => { window.location.href = '/cook.html'; };
+                }
+            });
     }
 
     setupMouseControls() {
@@ -259,14 +310,14 @@ class ModelViewer {
 
         // 마우스 이벤트 리스너
         this.renderer.domElement.addEventListener('mousedown', (event) => {
-            if (this.isAnimating || this.isPanning) return;
+            if (this.isAnimating || this.isPanning || !this.allowUserRotate) return;
             isMouseDown = true;
             lastMouseX = event.clientX;
             lastMouseY = event.clientY;
         });
 
         this.renderer.domElement.addEventListener('mousemove', (event) => {
-            if (this.isAnimating || this.isPanning) return;
+            if (this.isAnimating || this.isPanning || !this.allowUserRotate) return;
             if (isMouseDown && this.model) {
                 mouseX = event.clientX;
                 mouseY = event.clientY;
@@ -289,7 +340,7 @@ class ModelViewer {
 
         // 터치 이벤트 (모바일 지원)
         this.renderer.domElement.addEventListener('touchstart', (event) => {
-            if (this.isAnimating || this.isPanning) return;
+            if (this.isAnimating || this.isPanning || !this.allowUserRotate) return;
             event.preventDefault();
             isMouseDown = true;
             lastMouseX = event.touches[0].clientX;
@@ -297,7 +348,7 @@ class ModelViewer {
         });
 
         this.renderer.domElement.addEventListener('touchmove', (event) => {
-            if (this.isAnimating || this.isPanning) return;
+            if (this.isAnimating || this.isPanning || !this.allowUserRotate) return;
             event.preventDefault();
             if (isMouseDown && this.model) {
                 mouseX = event.touches[0].clientX;
@@ -548,7 +599,12 @@ class ModelViewer {
             .then(() => typeWriter(t1, text1))
             .then(() => showPng(line2Img))
             .then(() => typeWriter(t2, text2))
-            .then(() => { btn.style.display = 'inline-flex'; });
+            .then(() => {
+                btn.style.display = 'inline-flex';
+                // 시작하기 버튼이 보이는 동안 토글은 숨김 유지
+                const glass = document.getElementById('glassToggle');
+                if (glass) glass.style.display = 'none';
+            });
 
         window.addEventListener('resize', () => {
             svg.setAttribute('viewBox', `0 0 100 100`);
