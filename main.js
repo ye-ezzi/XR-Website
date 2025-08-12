@@ -108,6 +108,8 @@ class ModelViewer {
             btn.style.opacity = '0.6';
         }
 
+        sessionStorage.setItem('hasStarted', 'true'); // 시작 버튼 클릭 플래그 설정
+
         this.isAnimating = true;
 
         // 회전 목표: 현재 각도 기준 Y축으로 180도 추가
@@ -594,6 +596,16 @@ class ModelViewer {
         });
 
         // 시퀀스: 레이어 보이기 → line1 PNG → text1 → line2 PNG → text2 → 시작하기 버튼 표시
+        if (sessionStorage.getItem('hasStarted') === 'true') {
+            // 이미 시작 버튼이 눌렸다면, 어노테이션을 실행하지 않고 즉시 모델을 보여줌
+            layer.classList.remove('visible'); // 레이어 숨김
+            if (this.model) {
+                this.model.visible = true;
+                this.revealModelOverHome(); // 모델을 즉시 보여주고 애니메이션 시작
+            }
+            return;
+        }
+
         layer.classList.add('visible');
         showPng(line1Img)
             .then(() => typeWriter(t1, text1))
