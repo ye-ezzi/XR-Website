@@ -16,12 +16,16 @@ class ModelViewer {
         this.fadeMaterials = []; // 페이드에 사용되는 머티리얼 목록
         this.allowUserRotate = false; // 초기에는 사용자 회전 비활성화
         this.movementAnimation = null; // 좌우 움직임 시 Lottie 애니메이션
+        this.preloadedAnimation = null; // 미리 로드된 Lottie 애니메이션
         
         this.init();
         this.loadGLBModel('/models/glasses_ver2.glb');
     }
 
     init() {
+        // Lottie 애니메이션 미리 로드
+        this.preloadAnimation();
+        
         // Scene 설정 (투명 배경으로 설정해 뒤의 홈 이미지가 보이도록 함)
         this.scene = new THREE.Scene();
         this.scene.background = null;
@@ -264,6 +268,25 @@ class ModelViewer {
         if (glass) glass.style.display = 'flex';
     }
 
+    preloadAnimation() {
+        // 숨겨진 컨테이너 생성
+        const preloadContainer = document.createElement('div');
+        preloadContainer.style.display = 'none';
+        document.body.appendChild(preloadContainer);
+
+        // 애니메이션 미리 로드
+        this.preloadedAnimation = lottie.loadAnimation({
+            container: preloadContainer,
+            renderer: 'svg',
+            loop: false,
+            autoplay: false,
+            path: new URL('./videos/scan.json', window.location.origin).href,
+            rendererSettings: {
+                preserveAspectRatio: 'xMidYMid slice'
+            }
+        });
+    }
+
     startMovementAnimation() {
         const container = document.getElementById('movementAnimation');
         if (!container) return;
@@ -277,15 +300,15 @@ class ModelViewer {
         // 컨테이너 표시
         container.classList.add('visible');
         
-        // Lottie 애니메이션 로드 및 재생
+        // 미리 로드된 애니메이션의 설정을 복사하여 새 애니메이션 생성
         this.movementAnimation = lottie.loadAnimation({
             container: container,
             renderer: 'svg',
-            loop: true, // 10초 동안 반복 재생
+            loop: true,
             autoplay: true,
-            path: new URL('./videos/scan.json', window.location.origin).href,
+            animationData: this.preloadedAnimation.animationData, // 미리 로드된 데이터 사용
             rendererSettings: {
-                preserveAspectRatio: 'xMidYMid slice'  // 비율 무시하고 꽉 채우기
+                preserveAspectRatio: 'xMidYMid slice'
             }
         });
         
