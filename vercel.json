@@ -11,6 +11,7 @@
     { "src": "/images/(.*)", "dest": "/images/$1" },
     { "src": "/videos/(.*)", "dest": "/videos/$1" },
     { "src": "/favicon\\.(.*)", "dest": "/favicon.$1" },
+    { "src": "/cook.html", "dest": "/cook.html" },
     { "src": "/(.*)", "dest": "/index.html" }
   ]
 }
