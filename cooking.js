@@ -89,21 +89,27 @@ document.addEventListener('DOMContentLoaded', () => {
 
             // 측정하기 버튼 클릭 시 애니메이션 실행
             if (tab.querySelector('img').alt === 'Measure') {
+                console.log('Measure button clicked'); // 디버깅 로그
                 if (measureAnimation) {
                     measureAnimation.destroy();
                 }
                 
                 animationContainer.classList.add('visible');
-                measureAnimation = lottie.loadAnimation({
-                    container: animationContainer,
-                    renderer: 'svg',
-                    loop: false,
-                    autoplay: true,
-                    path: new URL('./videos/measure.json', window.location.origin).href,
-                    rendererSettings: {
-                        preserveAspectRatio: 'xMidYMid slice'
-                    }
-                });
+                try {
+                    measureAnimation = lottie.loadAnimation({
+                        container: animationContainer,
+                        renderer: 'svg',
+                        loop: false,
+                        autoplay: true,
+                        path: '/videos/measure.json', // 경로 수정
+                        rendererSettings: {
+                            preserveAspectRatio: 'xMidYMid slice'
+                        }
+                    });
+                    console.log('Animation loaded successfully'); // 디버깅 로그
+                } catch (error) {
+                    console.error('Error loading animation:', error); // 에러 로깅
+                }
 
                 measureAnimation.addEventListener('DOMLoaded', () => {
                     const svg = animationContainer.querySelector('svg');
