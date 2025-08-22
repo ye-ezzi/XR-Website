@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3D 뷰어</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lottie-web/5.12.2/lottie.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background: #1a1a1a; overflow: hidden; font-family: system-ui; }
+        #viewer { width: 100vw; height: 100vh; }
+        /* WebGL 캔버스를 홈 이미지 위로 올림 */
+        #viewer canvas { position: relative; z-index: 100; }
+
+        .loading { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: white; font-size: 1.2rem; z-index: 100; text-align: center; }
+        .spinner { border: 4px solid rgba(255, 255, 255, 0.3); border-top: 4px solid white; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin: 0 auto 10px; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .hidden { display: none; }
+
+        /* 시작하기 버튼 */
+        .start-button { position: absolute; left: 50%; bottom: 100px; transform: translateX(-50%); z-index: 200; padding: 12px 44px; border: 1.5px solid rgba(255,255,255,0.95); background: transparent; color: #fff; font-size: 16px; line-height: 1; border-radius: 999px; cursor: pointer; transition: all 0.2s ease; letter-spacing: 0.02em; font-family: inherit; }
+        .start-button:hover, .start-button:focus-visible { background: rgba(255,255,255,0.1); outline: none; }
+        .start-button:active { transform: translateX(-50%) scale(0.98); }
+
+        /* 홈 이미지: 배경 레이어로 하향 */
+        .home-image { position: fixed; inset: 0; width: 100vw; height: 100vh; object-fit: cover; z-index: 50; opacity: 0; transition: opacity 1.5s ease; pointer-events: none; }
+        .home-image.visible { opacity: 0.7; }
+        
+        /* 좌우 움직임 애니메이션: 3D 모델 좌우 이동 시 배경 */
+        .movement-animation { 
+            position: fixed; 
+            inset: 0; 
+            width: 100vw; 
+            height: 100vh; 
+            z-index: 45; 
+            opacity: 0; 
+            transition: opacity 0.5s ease; 
+            pointer-events: none;
+        }
+        .movement-animation.visible { opacity: 1; }
+        /* Lottie 애니메이션이 화면에 완전히 꽉 채우도록 강제 설정 */
+        .movement-animation {
+            overflow: hidden;
+        }
+        .movement-animation svg {
+            width: 100vw !important;
+            height: 100vh !important;
+            object-fit: fill !important;
+            transform: scale(1.1) !important;
+            transform-origin: center !important;
+        }
+        .movement-animation svg * {
+            width: 100% !important;
+            height: 100% !important;
+        }
+
+        /* Annotation overlay */
+        .anno-layer { position: fixed; inset: 0; z-index: 220; pointer-events: none; opacity: 0; transition: opacity .3s ease; }
+        .anno-layer.visible { opacity: 1; }
+
+        /* 텍스트 박스 */
+        .anno-text { position: absolute; max-width: min(15rem, 40vw); color: #ffffff; font-size: 14px; line-height: 1.6; background: transparent; border: none; padding: 0; border-radius: 0; font-family: inherit; }
+        .anno1 { top: 20%; right: 4%; text-align: left; }
+        .anno2 { bottom: 16%; left: 8%; text-align: left; }
+
+        /* line PNGs */
+        .anno-line1 { position: absolute; right: 22%; top: 24%; width: clamp(14px, 10vw, 80px); height: auto; opacity: 0; transition: opacity .4s ease; pointer-events: none; }
+        .anno-line1.visible { opacity: 1; }
+        .anno-line2 { position: absolute; left: 16%; bottom: 24%; width: clamp(18px, 20vw, 200px); height: auto; opacity: 0; transition: opacity .4s ease; pointer-events: none; }
+        .anno-line2.visible { opacity: 1; }
+
+        /* Cooking mode modal (overlay above canvas) */
+        .modal-wrap { position: fixed; inset: 0; display: none; align-items: center; justify-content: center; z-index: 260; }
+        .modal-backdrop { position: absolute; inset: 0; background: rgba(0,0,0,0.45); }
+        .modal { position: relative; width: min(520px, 90vw); padding: 20px; border-radius: 16px; background: rgba(255,255,255,0.12); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.2); color: #fff; z-index: 1; }
+        .modal h3 { font-size: 20px; margin-bottom: 12px; }
+        .modal p { font-size: 14px; opacity: 0.9; margin-bottom: 16px; }
+        .modal .actions { display: flex; gap: 10px; justify-content: flex-end; }
+        .btn { padding: 10px 14px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.25); background: rgba(255,255,255,0.08); color: #fff; cursor: pointer; }
+        .btn.primary { border-color: rgba(92,163,255,0.8); background: rgba(92,163,255,0.35); }
+    </style>
+</head>
+<body>
+    <div id="viewer"></div>
+    <div id="loading" class="loading">
+        <div class="spinner"></div>
+        <div>로딩 중...</div>
+    </div>
+    <button class="start-button" id="startButton">시작하기</button>
+
+    <!-- Annotation overlay -->
+    <div id="annoLayer" class="anno-layer">
+        <img id="line1Img" class="anno-line1" src="/images/line1.png" alt="line1" />
+        <img id="line2Img" class="anno-line2" src="/images/line2.png" alt="line2" />
+        <div id="line1Text" class="anno-text anno1"></div>
+        <div id="line2Text" class="anno-text anno2"></div>
+    </div>
+    <img id="homeImage" class="home-image" src="/images/Home.jpg" alt="Home" />
+    <div id="movementAnimation" class="movement-animation"></div>
+
+    <!-- Cooking mode modal -->
+    <div id="cookingModal" class="modal-wrap" style="display:none">
+        <div class="modal-backdrop"></div>
+        <div class="modal">
+            <h3>요리 모드로 전환할까요?</h3>
+            <p>요리 모드에서는 레시피와 단계별 안내가 표시됩니다.</p>
+            <div class="actions">
+                <button id="cookStart" class="btn primary">네, 시작할래요</button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module" src="/main.js"></script>
+</body>
+</html>

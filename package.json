@@ -1,0 +1,18 @@
+{
+  "name": "glb-viewer",
+  "version": "1.0.0",
+  "description": "GLB file viewer using Three.js",
+  "main": "index.js",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "lottie-web": "^5.13.0",
+    "three": "^0.158.0"
+  },
+  "devDependencies": {
+    "vite": "^4.5.0"
+  }
+}

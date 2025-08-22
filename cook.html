@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>요리 모드</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: system-ui; background: #0f1115; color: #fff; display: flex; flex-direction: column; min-height: 100vh; }
+
+    /* Bottom fixed bar */
+    .bottom-bar {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      background: rgba(26, 26, 26, 0.2); /* #1A1A1A 20% 투명도 배경색으로 수정 */
+      backdrop-filter: blur(12px);
+      border-top: 1px solid rgba(255, 255, 255, 0.18);
+      display: flex;
+      justify-content: space-around;
+      padding: 20px 0; /* 패딩 10px에서 20px로 수정 */
+      z-index: 1000;
+    }
+
+    .bottom-bar-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      color: #fff; /* 기본 텍스트 색상 */
+      font-size: 20px;
+      text-decoration: none;
+      transition: color 0.2s ease; /* 텍스트 색상 전환 효과 추가 */
+    }
+
+    .bottom-bar-item:hover {
+      color: rgba(255, 255, 200, 0.9); /* 호버 시 연한 노란색 텍스트 */
+      /* background 및 border-radius 제거 */
+    }
+
+    .bottom-bar-item.active {
+      color: #F4CF15; /* 활성 상태 색상 텍스트 */
+      /* background 및 border-radius 제거 */
+    }
+
+    .bottom-bar-item img {
+      width: 40px;
+      height: 40px;
+      /* transition: filter 0.2s ease; */ /* 필터 전환 제거 */
+    }
+
+    /* .bottom-bar-item:hover img, .bottom-bar-item.active img 스타일 제거 */
+  </style>
+</head>
+<body>
+  <main style="flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; padding-bottom: 80px;">
+    <div id="scan-content" class="tab-content active-content" style="display: none;">
+      <h1>Scan 모드</h1>
+      <p>주변을 스캔하세요.</p>
+    </div>
+    <div id="3d-receipt-content" class="tab-content" style="display: none;">
+      <h1>3D Recipe 모드</h1>
+      <p>3D 레시피 모델이 여기에 표시됩니다.</p>
+    </div>
+    <div id="zoom-content" class="tab-content" style="display: none;">
+      <h1>Zoom 모드</h1>
+      <p>확대/축소 기능을 사용하세요.</p>
+    </div>
+    <div id="measure-content" class="tab-content" style="display: none;">
+      <h1>Measure 모드</h1>
+      <p>객체의 크기를 측정하세요.</p>
+    </div>
+    <div id="record-content" class="tab-content" style="display: none;">
+      <h1>Record 모드</h1>
+      <p>영상을 녹화하거나 스크린샷을 찍으세요.</p>
+    </div>
+  </main>
+
+  <div class="bottom-bar">
+    <a href="#" class="bottom-bar-item" data-bg-image="/public/images/Home.jpg" data-active-src="/images/Scan_active.svg" data-target-content="scan-content">
+      <img src="/images/Scan.svg" alt="Scan" />
+      <span>탐색하기</span>
+    </a>
+    <a href="#" class="bottom-bar-item" data-bg-image="/public/images/line1.png" data-active-src="/images/3D Recipe_active.svg" data-target-content="3d-receipt-content">
+      <img src="/images/3D Recipe.svg" alt="3D Receipt" />
+      <span>3D 레시피</span>
+    </a>
+    <a href="#" class="bottom-bar-item" data-bg-image="/public/images/line2.png" data-active-src="/images/Zoom_active.svg" data-target-content="zoom-content">
+      <img src="/images/Zoom.svg" alt="Zoom" />
+      <span>확대하기</span>
+    </a>
+    <a href="#" class="bottom-bar-item" data-bg-image="/public/images/Logo.png" data-active-src="/images/Measure_active.svg" data-target-content="measure-content">
+      <img src="/images/Measure.svg" alt="Measure" />
+      <span>측정하기</span>
+    </a>
+    <a href="#" class="bottom-bar-item" data-bg-image="/public/images/Home.jpg" data-active-src="/images/Record_active.svg" data-target-content="record-content">
+      <img src="/images/Record.svg" alt="Record" />
+      <span>기록하기</span>
+    </a>
+  </div>
+
+  <div id="background-image-container" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; background-size: cover; background-position: center; transition: background-image 0.5s ease-in-out;"></div>
+
+  <script src="/cooking.js"></script>
+</body>
+</html>
