@@ -1,0 +1,12 @@
+{
+  "rewrites": [
+    {
+      "source": "/cook.html",
+      "destination": "/cook.html"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/$1"
+    }
+  ]
+}
