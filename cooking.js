@@ -5,6 +5,7 @@ console.log('Cooking mode loaded');
 document.addEventListener('DOMContentLoaded', () => {
     const tabs = document.querySelectorAll('.bottom-bar-item');
     const bgContainer = document.getElementById('background-image-container');
+    let measureAnimation = null;
 
     const updateTabState = (selectedTab) => {
         tabs.forEach(tab => {
@@ -47,10 +48,83 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
+    // 애니메이션 컨테이너 생성
+    const animationContainer = document.createElement('div');
+    animationContainer.id = 'measureAnimation';
+    animationContainer.style.cssText = `
+        position: fixed;
+        inset: 0;
+        width: 100vw;
+        height: 100vh;
+        z-index: 45;
+        opacity: 0;
+        transition: opacity 0.5s ease;
+        pointer-events: none;
+        overflow: hidden;
+    `;
+    document.body.appendChild(animationContainer);
+
+    // 스타일 추가
+    const style = document.createElement('style');
+    style.textContent = `
+        #measureAnimation.visible { opacity: 1; }
+        #measureAnimation svg {
+            width: 100vw !important;
+            height: 100vh !important;
+            object-fit: fill !important;
+            transform: scale(1.1) !important;
+            transform-origin: center !important;
+        }
+        #measureAnimation svg * {
+            width: 100% !important;
+            height: 100% !important;
+        }
+    `;
+    document.head.appendChild(style);
+
     tabs.forEach(tab => {
         tab.addEventListener('click', (e) => {
             e.preventDefault(); // 기본 링크 이동 방지
             updateTabState(tab);
+
+            // 측정하기 버튼 클릭 시 애니메이션 실행
+            if (tab.querySelector('img').alt === 'Measure') {
+                if (measureAnimation) {
+                    measureAnimation.destroy();
+                }
+                
+                animationContainer.classList.add('visible');
+                measureAnimation = lottie.loadAnimation({
+                    container: animationContainer,
+                    renderer: 'svg',
+                    loop: false,
+                    autoplay: true,
+                    path: new URL('./videos/measure.json', window.location.origin).href,
+                    rendererSettings: {
+                        preserveAspectRatio: 'xMidYMid slice'
+                    }
+                });
+
+                measureAnimation.addEventListener('DOMLoaded', () => {
+                    const svg = animationContainer.querySelector('svg');
+                    if (svg) {
+                        svg.setAttribute('viewBox', '0 0 1920 1080');
+                        svg.setAttribute('preserveAspectRatio', 'xMidYMid slice');
+                    }
+                });
+
+                // 애니메이션이 끝나면 마지막 프레임 유지
+                measureAnimation.addEventListener('complete', () => {
+                    measureAnimation.goToAndStop(measureAnimation.totalFrames - 1, true);
+                });
+            } else {
+                // 다른 탭 클릭 시 애니메이션 숨김
+                animationContainer.classList.remove('visible');
+                if (measureAnimation) {
+                    measureAnimation.destroy();
+                    measureAnimation = null;
+                }
+            }
         });
     });
 
