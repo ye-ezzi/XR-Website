@@ -283,7 +283,7 @@ class ModelViewer {
             renderer: 'svg',
             loop: true, // 10초 동안 반복 재생
             autoplay: true,
-            path: '/videos/scan.json',
+            path: new URL('./videos/scan.json', window.location.origin).href,
             rendererSettings: {
                 preserveAspectRatio: 'xMidYMid slice'  // 비율 무시하고 꽉 채우기
             }
@@ -358,7 +358,7 @@ class ModelViewer {
 
                 const startBtn = document.getElementById('cookStart');
                 if (startBtn) {
-                    startBtn.onclick = () => { window.location.href = '/cook.html'; };
+                    startBtn.onclick = () => { window.location.href = new URL('./cook.html', window.location.origin).href; };
                 }
             });
     }
