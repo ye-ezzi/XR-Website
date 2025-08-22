@@ -358,7 +358,7 @@ class ModelViewer {
 
                 const startBtn = document.getElementById('cookStart');
                 if (startBtn) {
-                    startBtn.onclick = () => { window.location.href = '/cook.html'; };
+                    startBtn.onclick = () => { window.location.href = '/cooking.html'; };
                 }
             });
     }
