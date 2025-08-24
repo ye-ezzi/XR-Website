@@ -38,20 +38,16 @@
             pointer-events: none;
         }
         .movement-animation.visible { opacity: 1; }
-        /* Lottie 애니메이션이 화면에 완전히 꽉 채우도록 강제 설정 */
+        /* MP4 비디오가 화면에 완전히 꽉 채우도록 설정 */
         .movement-animation {
             overflow: hidden;
         }
-        .movement-animation svg {
+        .movement-animation video {
             width: 100vw !important;
             height: 100vh !important;
-            object-fit: fill !important;
+            object-fit: cover !important;
             transform: scale(1.1) !important;
             transform-origin: center !important;
-        }
-        .movement-animation svg * {
-            width: 100% !important;
-            height: 100% !important;
         }
 
         /* Annotation overlay */
