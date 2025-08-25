@@ -298,7 +298,7 @@ class ModelViewer {
       width: 100vw !important;
       height: 100vh !important;
       object-fit: cover;
-      transform: scale(1.1);
+      transform: scale(1);
       transform-origin: center;
     `;
     

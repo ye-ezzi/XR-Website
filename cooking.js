@@ -88,7 +88,7 @@ document.addEventListener('DOMContentLoaded', () => {
             width: 100vw !important;
             height: 100vh !important;
             object-fit: cover !important;
-            transform: scale(1.1) !important;
+            transform: scale(1.2) !important;
             transform-origin: center !important;
         }
     `;
@@ -130,7 +130,7 @@ document.addEventListener('DOMContentLoaded', () => {
       width: 100vw !important;
       height: 100vh !important;
       object-fit: cover;
-      transform: scale(1.1);
+      transform: scale(1.2);
       transform-origin: center;
     `;
     
@@ -195,6 +195,8 @@ document.addEventListener('DOMContentLoaded', () => {
         videoPath = '/videos/measure.mp4';
       } else if (buttonAlt === 'Record') {
         videoPath = '/videos/capture.mp4';
+      } else if (buttonAlt === 'Zoom') {
+        videoPath = '/videos/zoom.mp4';
       }
       
       console.log('Loading video from path:', videoPath);
@@ -210,7 +212,7 @@ document.addEventListener('DOMContentLoaded', () => {
         width: 100vw !important;
         height: 100vh !important;
         object-fit: cover;
-        transform: scale(1);
+        transform: scale(1.4);
         transform-origin: center;
       `;
       
