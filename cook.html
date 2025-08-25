@@ -52,6 +52,47 @@
     }
 
     /* .bottom-bar-item:hover img, .bottom-bar-item.active img 스타일 제거 */
+    
+    /* Mobile responsive design */
+    @media (max-width: 768px) {
+      .bottom-bar {
+        padding: 15px 0;
+      }
+      
+      .bottom-bar-item {
+        font-size: 16px;
+        gap: 2px;
+      }
+      
+      .bottom-bar-item img {
+        width: 32px;
+        height: 32px;
+      }
+      
+      main {
+        padding-bottom: 90px !important;
+      }
+    }
+    
+    @media (max-width: 480px) {
+      .bottom-bar {
+        padding: 12px 0;
+      }
+      
+      .bottom-bar-item {
+        font-size: 14px;
+        gap: 1px;
+      }
+      
+      .bottom-bar-item img {
+        width: 28px;
+        height: 28px;
+      }
+      
+      main {
+        padding-bottom: 80px !important;
+      }
+    }
   </style>
 </head>
 <body>

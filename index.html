@@ -74,6 +74,79 @@
         .modal .actions { display: flex; gap: 10px; justify-content: flex-end; }
         .btn { padding: 10px 14px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.25); background: rgba(255,255,255,0.08); color: #fff; cursor: pointer; }
         .btn.primary { border-color: rgba(92,163,255,0.8); background: rgba(92,163,255,0.35); }
+
+        /* Mobile responsive design */
+        @media (max-width: 768px) {
+            /* 시작하기 버튼 모바일 최적화 */
+            .start-button { 
+                bottom: 60px; 
+                padding: 14px 32px; 
+                font-size: 18px; 
+                border-width: 2px;
+            }
+            
+            /* 텍스트 박스 모바일 최적화 */
+            .anno-text { 
+                font-size: 12px; 
+                max-width: min(12rem, 35vw); 
+                line-height: 1.4;
+            }
+            
+            /* 라인 이미지 크기 조정 */
+            .anno-line1 { 
+                width: clamp(12px, 8vw, 60px); 
+                right: 18%; 
+                top: 22%;
+            }
+            .anno-line2 { 
+                width: clamp(15px, 15vw, 150px); 
+                left: 12%; 
+                bottom: 20%;
+            }
+            
+            /* 모달 모바일 최적화 */
+            .modal { 
+                width: min(400px, 85vw); 
+                padding: 24px;
+                margin: 20px;
+            }
+            .modal h3 { font-size: 18px; }
+            .modal p { font-size: 13px; }
+            .btn { 
+                padding: 12px 18px; 
+                font-size: 14px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            /* 작은 모바일 화면 최적화 */
+            .start-button { 
+                bottom: 40px; 
+                padding: 12px 28px; 
+                font-size: 16px;
+            }
+            
+            .anno-text { 
+                font-size: 11px; 
+                max-width: min(10rem, 30vw); 
+            }
+            
+            .anno-line1 { 
+                width: clamp(10px, 6vw, 50px); 
+                right: 15%; 
+            }
+            .anno-line2 { 
+                width: clamp(12px, 12vw, 120px); 
+                left: 10%; 
+            }
+            
+            .modal { 
+                width: min(350px, 90vw); 
+                padding: 20px;
+            }
+            .modal h3 { font-size: 16px; }
+            .modal p { font-size: 12px; }
+        }
     </style>
 </head>
 <body>

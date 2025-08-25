@@ -91,6 +91,19 @@ document.addEventListener('DOMContentLoaded', () => {
             transform: scale(1.2) !important;
             transform-origin: center !important;
         }
+        
+        /* Mobile responsive design for videos */
+        @media (max-width: 768px) {
+            #measureAnimation video {
+                transform: scale(1.1) !important;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            #measureAnimation video {
+                transform: scale(1.0) !important;
+            }
+        }
     `;
   document.head.appendChild(style);
 
@@ -130,11 +143,15 @@ document.addEventListener('DOMContentLoaded', () => {
     videoElement.loop = false; // 반복재생 하지 않음
     videoElement.muted = true;
     videoElement.playsInline = true;
+    // 모바일에서 스케일 조정
+    const isMobile = window.innerWidth <= 768;
+    const scale = isMobile ? (window.innerWidth <= 480 ? '1.0' : '1.1') : '1.2';
+    
     videoElement.style.cssText = `
       width: 100vw !important;
       height: 100vh !important;
       object-fit: cover;
-      transform: scale(1.2);
+      transform: scale(${scale});
       transform-origin: center;
     `;
     
@@ -210,11 +227,15 @@ document.addEventListener('DOMContentLoaded', () => {
       videoElement.loop = false;
       videoElement.muted = true;
       videoElement.playsInline = true;
+      // 모바일에서 스케일 조정
+      const isMobile = window.innerWidth <= 768;
+      const scale = isMobile ? (window.innerWidth <= 480 ? '1.0' : '1.1') : '1.4';
+      
       videoElement.style.cssText = `
         width: 100vw !important;
         height: 100vh !important;
         object-fit: cover;
-        transform: scale(1.4);
+        transform: scale(${scale});
         transform-origin: center;
       `;
       
