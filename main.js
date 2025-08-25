@@ -369,7 +369,12 @@ class ModelViewer {
 
         const startBtn = document.getElementById('cookStart');
         if (startBtn) {
-          startBtn.onclick = () => { window.location.href = new URL('./cook.html', window.location.origin).href; };
+          startBtn.onclick = () => { 
+            // 팝업 즉시 숨기기
+            if (modal) modal.style.display = 'none';
+            // 페이지 이동
+            window.location.href = new URL('./cook.html', window.location.origin).href; 
+          };
         }
       });
   }

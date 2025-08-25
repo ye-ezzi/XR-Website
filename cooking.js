@@ -9,7 +9,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // 페이지 로드 시 바로 explore 영상 재생
   setTimeout(() => {
     playExploreVideo();
-  }, 500);
+  }, 100);
 
   const updateTabState = (selectedTab) => {
     tabs.forEach(tab => {
@@ -111,6 +111,10 @@ document.addEventListener('DOMContentLoaded', () => {
     allContents.forEach(content => {
       content.style.display = 'none';
     });
+    
+    // 애니메이션 컨테이너를 미리 준비하여 빠른 로딩
+    animationContainer.innerHTML = '';
+    animationContainer.classList.remove('visible');
             
     console.log('Auto-playing explore video on page load');
     
@@ -140,11 +144,9 @@ document.addEventListener('DOMContentLoaded', () => {
       console.log('Explore video loaded successfully');
       videoElement.play();
       
-      // 비디오가 로드된 후 fade-in으로 컨테이너 표시
-      setTimeout(() => {
-        animationContainer.classList.add('visible');
-        console.log('Explore video container faded in');
-      }, 100);
+      // 비디오가 로드된 후 즉시 컨테이너 표시
+      animationContainer.classList.add('visible');
+      console.log('Explore video container faded in');
     });
     
     videoElement.addEventListener('ended', () => {
@@ -222,11 +224,9 @@ document.addEventListener('DOMContentLoaded', () => {
         console.log('Video loaded successfully');
         videoElement.play();
         
-        // 비디오가 로드된 후 fade-in으로 컨테이너 표시
-        setTimeout(() => {
-          animationContainer.classList.add('visible');
-          console.log('Video container faded in');
-        }, 100);
+        // 비디오가 로드된 후 즉시 컨테이너 표시
+        animationContainer.classList.add('visible');
+        console.log('Video container faded in');
       });
       
       videoElement.addEventListener('ended', () => {
