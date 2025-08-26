@@ -109,6 +109,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // explore 영상 재생 함수
   function playExploreVideo() {
+    // 성능 측정 시작
+    const loadStartTime = performance.now();
+    
     // Lottie 라이브러리가 로드되었는지 확인
     if (typeof lottie === 'undefined') {
       console.error('Lottie library is not loaded');
@@ -158,7 +161,11 @@ document.addEventListener('DOMContentLoaded', () => {
     animationContainer.appendChild(videoElement);
     
     videoElement.addEventListener('loadeddata', () => {
-      console.log('Explore video loaded successfully');
+      const loadEndTime = performance.now();
+      const loadTime = loadEndTime - loadStartTime;
+      console.log(`Explore video loaded successfully in ${loadTime.toFixed(2)}ms`);
+      console.log(`Video size: ${videoElement.videoWidth}x${videoElement.videoHeight}`);
+      
       videoElement.play();
       
       // 비디오가 로드된 후 즉시 컨테이너 표시
@@ -171,7 +178,10 @@ document.addEventListener('DOMContentLoaded', () => {
     });
     
     videoElement.addEventListener('error', (e) => {
-      console.error('Error loading explore video:', e);
+      const loadEndTime = performance.now();
+      const loadTime = loadEndTime - loadStartTime;
+      console.error(`Error loading explore video after ${loadTime.toFixed(2)}ms:`, e);
+      console.error('Failed video path: /videos/explore.mp4');
     });
   }
 
@@ -183,6 +193,9 @@ document.addEventListener('DOMContentLoaded', () => {
       // 버튼별로 다른 영상 재생
       const buttonAlt = tab.querySelector('img').alt;
       console.log('Button clicked:', buttonAlt);
+      
+      // 성능 측정 시작
+      const loadStartTime = performance.now();
       
       // Lottie 라이브러리가 로드되었는지 확인
       if (typeof lottie === 'undefined') {
@@ -242,7 +255,12 @@ document.addEventListener('DOMContentLoaded', () => {
       animationContainer.appendChild(videoElement);
       
       videoElement.addEventListener('loadeddata', () => {
-        console.log('Video loaded successfully');
+        const loadEndTime = performance.now();
+        const loadTime = loadEndTime - loadStartTime;
+        console.log(`${buttonAlt} video loaded successfully in ${loadTime.toFixed(2)}ms`);
+        console.log(`Video size: ${videoElement.videoWidth}x${videoElement.videoHeight}`);
+        console.log(`Video path: ${videoPath}`);
+        
         videoElement.play();
         
         // 비디오가 로드된 후 즉시 컨테이너 표시
@@ -255,7 +273,10 @@ document.addEventListener('DOMContentLoaded', () => {
       });
       
       videoElement.addEventListener('error', (e) => {
-        console.error('Error loading video:', e);
+        const loadEndTime = performance.now();
+        const loadTime = loadEndTime - loadStartTime;
+        console.error(`Error loading ${buttonAlt} video after ${loadTime.toFixed(2)}ms:`, e);
+        console.error(`Failed video path: ${videoPath}`);
       });
     });
   });

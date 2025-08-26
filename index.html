@@ -85,23 +85,33 @@
                 border-width: 2px;
             }
             
-            /* 텍스트 박스 모바일 최적화 */
+            /* 텍스트 박스 모바일 최적화 - 2줄 표시 가능하게 */
             .anno-text { 
-                font-size: 12px; 
-                max-width: min(12rem, 35vw); 
+                font-size: 14px; 
+                max-width: min(20rem, 50vw); 
                 line-height: 1.4;
             }
             
-            /* 라인 이미지 크기 조정 */
+            /* 모바일에서 텍스트 위치 조정 */
+            .anno1 { 
+                top: 24%; 
+                right: 6%; 
+            }
+            .anno2 { 
+                bottom: 24%; 
+                left: 6%; 
+            }
+            
+            /* 라인 이미지 크기 조정 - 3D 모델에 더 가깝게 */
             .anno-line1 { 
                 width: clamp(12px, 8vw, 60px); 
-                right: 18%; 
-                top: 22%;
+                right: 25%; 
+                top: 28%;
             }
             .anno-line2 { 
                 width: clamp(15px, 15vw, 150px); 
-                left: 12%; 
-                bottom: 20%;
+                left: 20%; 
+                bottom: 28%;
             }
             
             /* 모달 모바일 최적화 */
@@ -128,16 +138,18 @@
             
             .anno-text { 
                 font-size: 11px; 
-                max-width: min(10rem, 30vw); 
+                max-width: min(16rem, 45vw); 
             }
             
             .anno-line1 { 
-                width: clamp(10px, 6vw, 50px); 
-                right: 15%; 
+                width: clamp(20px, 14vw, 50px); 
+                right: 22%; 
+                top: 34%;
             }
             .anno-line2 { 
-                width: clamp(12px, 12vw, 120px); 
+                width: clamp(22px, 30vw, 120px); 
                 left: 10%; 
+                bottom: 35%;
             }
             
             .modal { 

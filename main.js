@@ -600,7 +600,12 @@ class ModelViewer {
     const maxDim = Math.max(size.x, size.y, size.z);
     const targetWidth = 20;
     const scale = targetWidth / maxDim;
-    this.model.scale.setScalar(scale);
+    
+    // 모바일에서 3D 모델 크기 1.2배 증가
+    const isMobile = window.innerWidth <= 768;
+    const mobileScale = isMobile ? 1.0 : 1.0;
+    
+    this.model.scale.setScalar(scale * mobileScale);
     const center = box.getCenter(new THREE.Vector3());
     this.model.position.sub(center);
     this.model.position.y += 0.05;
@@ -613,7 +618,8 @@ class ModelViewer {
     const size = box.getSize(new THREE.Vector3());
     const width = size.x;
     const height = size.y;
-    const padding = 1.5; // 여백
+    const isMobile = window.innerWidth <= 768;
+    const padding = isMobile ? 1.1 : 1.5; // 모바일에서 패딩 축소
     const requiredHeight = Math.max(height * padding, (width * padding) / aspect);
     this.frustumSize = requiredHeight;
     this.camera.left = (-aspect * this.frustumSize) / 2;
