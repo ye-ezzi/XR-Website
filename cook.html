@@ -21,7 +21,7 @@
       display: flex;
       justify-content: space-around;
       padding: 20px 0; /* 패딩 10px에서 20px로 수정 */
-      z-index: 1000;
+      z-index: 2000;
     }
 
     .bottom-bar-item {
@@ -93,6 +93,382 @@
         padding-bottom: 80px !important;
       }
     }
+
+    /* 탭별 팝업 스타일 - 시작하기 모달과 동일한 스타일 */
+    .tab-popup {
+      position: fixed;
+      inset: 0;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 2000; /* 영상(z-index: 1000)보다 높게 설정 */
+    }
+
+    .tab-popup::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: rgba(0,0,0,0.45);
+    }
+
+    .popup-content {
+      position: relative;
+      width: min(520px, 90vw);
+      padding: 20px;
+      border-radius: 16px;
+      background: rgba(255,255,255,0.12);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255,255,255,0.2);
+      color: #fff;
+      z-index: 1;
+      text-align: center;
+    }
+
+    .popup-content h3 {
+      font-size: 20px;
+      margin-bottom: 12px;
+    }
+
+    .popup-content p {
+      font-size: 14px;
+      opacity: 0.9;
+      margin-bottom: 16px;
+    }
+
+    .popup-actions {
+      display: flex;
+      gap: 10px;
+      justify-content: flex-end;
+    }
+
+    .close-popup {
+      padding: 10px 14px;
+      border-radius: 10px;
+      border: 1px solid rgba(255,255,255,0.25);
+      background: rgba(255,255,255,0.08);
+      color: #fff;
+      cursor: pointer;
+      font-family: inherit;
+      transition: all 0.2s ease;
+    }
+
+    .close-popup:hover {
+      background: rgba(255,255,255,0.2);
+    }
+
+    .close-popup.primary {
+      border-color: rgba(92,163,255,0.8);
+      background: rgba(92,163,255,0.35);
+    }
+
+    /* 모바일 반응형 */
+    @media (max-width: 768px) {
+      .popup-content {
+        width: min(400px, 85vw);
+        padding: 24px;
+        margin: 20px;
+      }
+      
+      .popup-content h3 {
+        font-size: 18px;
+      }
+      
+      .popup-content p {
+        font-size: 13px;
+      }
+      
+      .close-popup {
+        padding: 12px 18px;
+        font-size: 14px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .popup-content {
+        width: min(350px, 90vw);
+        padding: 20px;
+      }
+
+      .popup-content h3 {
+        font-size: 16px;
+      }
+
+      .popup-content p {
+        font-size: 12px;
+      }
+    }
+
+    /* 팝업 닫기 버튼 */
+    .popup-close-btn {
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      color: #fff;
+      font-size: 20px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s ease;
+      z-index: 10;
+    }
+
+    .popup-close-btn:hover {
+      background: rgba(255, 255, 255, 0.2);
+      border-color: rgba(244, 207, 21, 0.8);
+      transform: scale(1.1);
+    }
+
+    .popup-close-btn:active {
+      transform: scale(0.95);
+    }
+
+    /* 탐색 이미지 컨테이너 */
+    .scan-image-container {
+      position: fixed;
+      inset: 0;
+      display: none;
+      z-index: 1500;
+      background: transparent;
+      pointer-events: none;
+    }
+
+    .scan-image-container.active {
+      display: block;
+      pointer-events: auto;
+    }
+
+    .scan-image-container img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      pointer-events: none;
+    }
+
+    /* 사각형 선택 영역 */
+    .selectable-area {
+      position: absolute;
+      border: 2px solid transparent;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      pointer-events: auto;
+    }
+
+    .selectable-area:hover {
+      border: 2px solid rgba(244, 207, 21, 0.8);
+      background: rgba(244, 207, 21, 0.1);
+    }
+
+    .selectable-area.selected {
+      border: 3px solid rgba(244, 207, 21, 1);
+      background: rgba(244, 207, 21, 0.2);
+      box-shadow: 0 0 20px rgba(244, 207, 21, 0.6);
+    }
+
+    /* 선택 정보 팝업 */
+    .area-info-popup {
+      position: absolute;
+      bottom: -70px;
+      left: 50%;
+      transform: translateX(-50%);
+      padding: 12px 16px;
+      background: rgba(26, 26, 26, 0.95);
+      backdrop-filter: blur(12px);
+      border-radius: 10px;
+      border: 1px solid rgba(244, 207, 21, 0.5);
+      color: #fff;
+      white-space: nowrap;
+      opacity: 0;
+      pointer-events: none;
+      transition: all 0.3s ease;
+      z-index: 10;
+    }
+
+    .selectable-area:hover .area-info-popup,
+    .selectable-area.selected .area-info-popup {
+      opacity: 1;
+    }
+
+    .area-info-popup h4 {
+      color: #F4CF15;
+      font-size: 14px;
+      margin: 0;
+    }
+
+    /* 모바일 반응형 */
+    @media (max-width: 768px) {
+      .selectable-area {
+        border-width: 1.5px;
+      }
+
+      .selectable-area.selected {
+        border-width: 2px;
+      }
+
+      .area-info-popup {
+        bottom: -60px;
+        padding: 10px 14px;
+      }
+
+      .area-info-popup h4 {
+        font-size: 13px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .area-info-popup {
+        bottom: -55px;
+        padding: 8px 12px;
+      }
+
+      .area-info-popup h4 {
+        font-size: 12px;
+      }
+    }
+
+    /* 확대하기 컨트롤 UI */
+    .zoom-control {
+      position: fixed;
+      bottom: 120px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: none;
+      align-items: center;
+      gap: 15px;
+      padding: 20px 30px;
+      background: rgba(26, 26, 26, 0.85);
+      backdrop-filter: blur(12px);
+      border-radius: 50px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      z-index: 1500;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    }
+
+    .zoom-control.active {
+      display: flex;
+    }
+
+    .zoom-btn {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.25);
+      color: #fff;
+      font-size: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      user-select: none;
+    }
+
+    .zoom-btn:hover {
+      background: rgba(255, 255, 255, 0.2);
+      border-color: rgba(244, 207, 21, 0.8);
+    }
+
+    .zoom-btn:active {
+      transform: scale(0.95);
+    }
+
+    .zoom-slider {
+      width: 200px;
+      height: 6px;
+      border-radius: 3px;
+      background: rgba(255, 255, 255, 0.2);
+      position: relative;
+      cursor: pointer;
+    }
+
+    .zoom-slider-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #F4CF15, #FFD700);
+      border-radius: 3px;
+      width: 0%;
+      transition: width 0.1s ease;
+    }
+
+    .zoom-slider-thumb {
+      position: absolute;
+      top: 50%;
+      left: 0%;
+      transform: translate(-50%, -50%);
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: #F4CF15;
+      border: 2px solid #fff;
+      cursor: grab;
+      transition: left 0.1s ease;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    }
+
+    .zoom-slider-thumb:active {
+      cursor: grabbing;
+    }
+
+    .zoom-value {
+      color: #F4CF15;
+      font-size: 16px;
+      font-weight: 600;
+      min-width: 50px;
+      text-align: center;
+    }
+
+    /* 모바일 반응형 */
+    @media (max-width: 768px) {
+      .zoom-control {
+        bottom: 100px;
+        padding: 15px 20px;
+        gap: 10px;
+      }
+
+      .zoom-btn {
+        width: 40px;
+        height: 40px;
+        font-size: 20px;
+      }
+
+      .zoom-slider {
+        width: 150px;
+      }
+
+      .zoom-value {
+        font-size: 14px;
+        min-width: 45px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .zoom-control {
+        bottom: 90px;
+        padding: 12px 16px;
+        gap: 8px;
+      }
+
+      .zoom-btn {
+        width: 36px;
+        height: 36px;
+        font-size: 18px;
+      }
+
+      .zoom-slider {
+        width: 120px;
+      }
+
+      .zoom-value {
+        font-size: 13px;
+        min-width: 40px;
+      }
+    }
+
   </style>
 </head>
 <body>
@@ -116,6 +492,134 @@
       <p>영상을 녹화하거나 스크린샷을 찍으세요.</p>
     </div>
   </main>
+
+  <!-- 탐색 이미지 컨테이너 -->
+  <div id="scan-image-container" class="scan-image-container">
+    <img id="scan-image" src="/images/Screen.png" alt="Scan View" />
+
+    <!-- 선택 가능한 영역들 -->
+    <div class="selectable-area" data-area="microwave" style="top: 25%; left: 15%; width: 20%; height: 25%;">
+      <div class="area-info-popup">
+        <h4>🔥 전자레인지</h4>
+      </div>
+    </div>
+
+    <div class="selectable-area" data-area="fridge" style="top: 20%; right: 15%; width: 18%; height: 35%;">
+      <div class="area-info-popup">
+        <h4>❄️ 냉장고</h4>
+      </div>
+    </div>
+
+    <div class="selectable-area" data-area="bowl" style="bottom: 30%; left: 40%; width: 15%; height: 18%;">
+      <div class="area-info-popup">
+        <h4>🍽️ 탁자 위 그릇</h4>
+      </div>
+    </div>
+  </div>
+
+  <div id="3d-receipt-popup" class="tab-popup" style="display: none;">
+    <div class="popup-content recipe-popup" style="max-height: 80vh; overflow-y: auto; cursor: move; position: relative;">
+      <button class="popup-close-btn" onclick="document.getElementById('3d-receipt-popup').style.display='none'">×</button>
+      <h3>🍝 토마토 스파게티 레시피</h3>
+
+      <div style="text-align: left; margin: 20px 0;">
+        <h4 style="color: #F4CF15; margin-bottom: 10px;">재료 (2인분)</h4>
+        <ul style="list-style: none; padding-left: 0; opacity: 0.9;">
+          <li>• 스파게티 면 200g</li>
+          <li>• 토마토 소스 400ml</li>
+          <li>• 마늘 3쪽</li>
+          <li>• 올리브유 2큰술</li>
+          <li>• 양파 1/2개</li>
+          <li>• 바질 약간</li>
+          <li>• 소금, 후추 약간</li>
+          <li>• 파마산 치즈 (선택)</li>
+        </ul>
+      </div>
+
+      <div style="text-align: left; margin: 20px 0;">
+        <h4 style="color: #F4CF15; margin-bottom: 10px;">조리 순서</h4>
+        <ol style="padding-left: 20px; opacity: 0.9; line-height: 1.8;">
+          <li>큰 냄비에 물을 끓이고 소금을 넣은 후 스파게티 면을 8-10분간 삶습니다.</li>
+          <li>마늘과 양파를 잘게 다집니다.</li>
+          <li>팬에 올리브유를 두르고 마늘과 양파를 볶습니다.</li>
+          <li>토마토 소스를 넣고 중불에서 5분간 끓입니다.</li>
+          <li>삶은 스파게티 면을 소스에 넣고 잘 섞습니다.</li>
+          <li>소금, 후추로 간을 맞추고 바질을 올립니다.</li>
+          <li>접시에 담고 파마산 치즈를 뿌려 완성합니다.</li>
+        </ol>
+      </div>
+
+      <div style="text-align: left; margin: 20px 0; padding: 15px; background: rgba(244, 207, 21, 0.1); border-radius: 8px;">
+        <h4 style="color: #F4CF15; margin-bottom: 8px;">💡 팁</h4>
+        <p style="opacity: 0.9; margin: 0; font-size: 13px;">
+          면을 삶을 때 물에 소금을 충분히 넣으면 더 맛있습니다.
+          면수를 조금 남겨두었다가 소스에 추가하면 더 부드러운 맛을 낼 수 있습니다.
+        </p>
+      </div>
+
+      <div class="popup-actions">
+        <button class="close-popup primary">확인</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 확대하기 컨트롤 UI -->
+  <div id="zoom-control" class="zoom-control">
+    <div class="zoom-btn" id="zoom-out">−</div>
+    <div class="zoom-slider" id="zoom-slider">
+      <div class="zoom-slider-fill" id="zoom-slider-fill"></div>
+      <div class="zoom-slider-thumb" id="zoom-slider-thumb"></div>
+    </div>
+    <div class="zoom-btn" id="zoom-in">+</div>
+    <div class="zoom-value" id="zoom-value">1.0x</div>
+  </div>
+
+  <div id="measure-popup" class="tab-popup" style="display: none;">
+    <div class="popup-content">
+      <h3>측정하기 팝업</h3>
+      <p>측정 기능이 완료되었습니다.</p>
+      <div class="popup-actions">
+        <button class="close-popup">닫기</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="record-popup" class="tab-popup" style="display: none;">
+    <div class="popup-content" style="max-width: 480px; position: relative; padding: 16px;">
+      <button class="popup-close-btn" onclick="document.getElementById('record-popup').style.display='none'" style="top: 12px; right: 12px; width: 28px; height: 28px; font-size: 18px;">×</button>
+      <h3 style="margin-bottom: 16px; font-size: 18px;">📸 음식 기록하기</h3>
+
+      <!-- Capture food 이미지 -->
+      <div style="margin-bottom: 16px;">
+        <img src="/images/Capture food.png" alt="Capture Food" style="width: 80%; display: block; margin: 0 auto; border-radius: 10px; box-shadow: 0 3px 10px rgba(0,0,0,0.3);" />
+      </div>
+
+      <!-- 설명 입력 폼 -->
+      <div style="margin-bottom: 16px;">
+        <label style="display: block; margin-bottom: 6px; color: #F4CF15; font-weight: 600; font-size: 13px;">설명 작성</label>
+        <textarea id="food-description"
+                  placeholder="음식에 대한 설명을 작성해주세요..."
+                  style="width: 100%; min-height: 96px; padding: 10px; border-radius: 8px; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.2); color: #fff; font-family: inherit; font-size: 13px; resize: vertical;"
+        ></textarea>
+      </div>
+
+      <div class="popup-actions">
+        <button class="close-popup" onclick="document.getElementById('record-popup').style.display='none'" style="padding: 8px 12px; font-size: 13px;">취소</button>
+        <button class="close-popup primary" onclick="saveRecord()" style="padding: 8px 12px; font-size: 13px;">저장하기</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 저장 완료 팝업 -->
+  <div id="save-success-popup" class="tab-popup" style="display: none;">
+    <div class="popup-content" style="text-align: center;">
+      <h3 style="color: #F4CF15; margin-bottom: 12px;">✓ 저장되었습니다</h3>
+      <p style="margin-bottom: 20px;">음식 기록이 성공적으로 저장되었습니다.</p>
+      <div class="popup-actions" style="justify-content: center;">
+        <button class="close-popup primary" onclick="document.getElementById('save-success-popup').style.display='none'">확인</button>
+      </div>
+    </div>
+  </div>
 
   <div class="bottom-bar">
     <a href="#" class="bottom-bar-item" data-active-src="/images/Scan_active.svg" data-target-content="scan-content">
@@ -142,5 +646,31 @@
 
 
   <script type="module" src="/cooking.js"></script>
+  <script>
+    // 음식 기록 저장 함수
+    function saveRecord() {
+      const description = document.getElementById('food-description').value.trim();
+
+      if (!description) {
+        alert('설명을 입력해주세요.');
+        return;
+      }
+
+      // 저장 로직 (콘솔에 출력)
+      console.log('음식 기록 저장:', {
+        description: description,
+        timestamp: new Date().toISOString()
+      });
+
+      // 기록 팝업 닫기
+      document.getElementById('record-popup').style.display = 'none';
+
+      // 입력 필드 초기화
+      document.getElementById('food-description').value = '';
+
+      // 저장 완료 팝업 표시
+      document.getElementById('save-success-popup').style.display = 'flex';
+    }
+  </script>
 </body>
 </html>

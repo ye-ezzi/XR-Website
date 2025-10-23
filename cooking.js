@@ -11,6 +11,19 @@ document.addEventListener('DOMContentLoaded', () => {
     playExploreVideo();
   }, 100);
 
+  // 팝업 관련 함수들
+  initPopupEvents();
+
+  // 드래그 기능 초기화
+  initDraggablePopup();
+
+  // 확대하기 컨트롤 초기화
+  initZoomControl();
+
+  // 탐색 이미지 뷰 초기화
+  initScanImageView();
+
+
   const updateTabState = (selectedTab) => {
     tabs.forEach(tab => {
       tab.classList.remove('active');
@@ -174,7 +187,10 @@ document.addEventListener('DOMContentLoaded', () => {
     });
     
     videoElement.addEventListener('ended', () => {
-      console.log('Explore video ended - keeping last frame');
+      console.log('Explore video ended - showing scan image overlay');
+      // 영상을 마지막 프레임에서 멈추고 이미지 레이어를 위에 표시
+      videoElement.pause();
+      showScanImageView();
     });
     
     videoElement.addEventListener('error', (e) => {
@@ -190,9 +206,10 @@ document.addEventListener('DOMContentLoaded', () => {
       e.preventDefault(); // 기본 링크 이동 방지
       updateTabState(tab);
 
-      // 버튼별로 다른 영상 재생
+      // 버튼별로 다른 처리
       const buttonAlt = tab.querySelector('img').alt;
       console.log('Button clicked:', buttonAlt);
+      
       
       // 성능 측정 시작
       const loadStartTime = performance.now();
@@ -236,7 +253,8 @@ document.addEventListener('DOMContentLoaded', () => {
       // MP4 비디오 요소 생성
       const videoElement = document.createElement('video');
       videoElement.src = videoPath;
-      videoElement.autoplay = true;
+      // Zoom 버튼은 자동재생 안함, 나머지는 자동재생
+      videoElement.autoplay = (buttonAlt !== 'Zoom');
       videoElement.loop = false;
       videoElement.muted = true;
       videoElement.playsInline = true;
@@ -260,16 +278,34 @@ document.addEventListener('DOMContentLoaded', () => {
         console.log(`${buttonAlt} video loaded successfully in ${loadTime.toFixed(2)}ms`);
         console.log(`Video size: ${videoElement.videoWidth}x${videoElement.videoHeight}`);
         console.log(`Video path: ${videoPath}`);
-        
-        videoElement.play();
-        
-        // 비디오가 로드된 후 즉시 컨테이너 표시
-        animationContainer.classList.add('visible');
-        console.log('Video container faded in');
+
+        // Zoom 버튼은 자동 재생하지 않고 컨트롤 UI 즉시 표시
+        if (buttonAlt === 'Zoom') {
+          // 비디오가 로드된 후 즉시 컨테이너 표시
+          animationContainer.classList.add('visible');
+          console.log('Video container faded in');
+          // 컨트롤 UI 표시
+          showZoomControl(videoElement);
+        } else {
+          // 다른 버튼들은 기존대로 자동 재생
+          videoElement.play();
+          // 비디오가 로드된 후 즉시 컨테이너 표시
+          animationContainer.classList.add('visible');
+          console.log('Video container faded in');
+        }
       });
-      
+
       videoElement.addEventListener('ended', () => {
-        console.log('Video ended - keeping last frame');
+        console.log(`${buttonAlt} video ended`);
+        // Zoom 버튼은 ended 이벤트 없음 (자동재생 안함)
+        if (buttonAlt === 'Scan') {
+          // Scan은 영상 멈추고 이미지 레이어 표시
+          videoElement.pause();
+          showScanImageView();
+        } else if (buttonAlt !== 'Zoom') {
+          // 나머지는 팝업 표시
+          showTabPopup(buttonAlt);
+        }
       });
       
       videoElement.addEventListener('error', (e) => {
@@ -291,4 +327,335 @@ document.addEventListener('DOMContentLoaded', () => {
       updateTabState(tabs[0]);
     }
   }
+
+  // 팝업 관련 함수들
+  function initPopupEvents() {
+    // 모든 닫기 버튼에 이벤트 리스너 추가
+    const closeButtons = document.querySelectorAll('.close-popup');
+    closeButtons.forEach(button => {
+      button.addEventListener('click', () => {
+        closeAllPopups();
+      });
+    });
+
+    // 팝업 배경 클릭 시 닫기
+    const popups = document.querySelectorAll('.tab-popup');
+    popups.forEach(popup => {
+      popup.addEventListener('click', (e) => {
+        if (e.target === popup) {
+          closeAllPopups();
+        }
+      });
+    });
+  }
+
+  function showTabPopup(buttonAlt) {
+    closeAllPopups(); // 기존 팝업 닫기
+    
+    let popupId = '';
+    switch(buttonAlt) {
+      case 'Scan':
+        popupId = 'scan-popup';
+        break;
+      case '3D Receipt':
+        popupId = '3d-receipt-popup';
+        break;
+      case 'Zoom':
+        popupId = 'zoom-popup';
+        break;
+      case 'Measure':
+        popupId = 'measure-popup';
+        break;
+      case 'Record':
+        popupId = 'record-popup';
+        break;
+      default:
+        console.log('Unknown button:', buttonAlt);
+        return;
+    }
+
+    const popup = document.getElementById(popupId);
+    if (popup) {
+      popup.style.display = 'flex';
+      console.log(`Showing popup: ${popupId}`);
+    }
+  }
+
+  function closeAllPopups() {
+    const popups = document.querySelectorAll('.tab-popup');
+    popups.forEach(popup => {
+      popup.style.display = 'none';
+    });
+  }
+
+  // 드래그 가능한 팝업 기능
+  function initDraggablePopup() {
+    const recipePopup = document.getElementById('3d-receipt-popup');
+    const popupContent = recipePopup.querySelector('.popup-content');
+
+    let isDragging = false;
+    let currentX;
+    let currentY;
+    let initialX;
+    let initialY;
+    let xOffset = 0;
+    let yOffset = 0;
+
+    popupContent.addEventListener('mousedown', dragStart);
+    popupContent.addEventListener('touchstart', dragStart);
+
+    document.addEventListener('mousemove', drag);
+    document.addEventListener('touchmove', drag);
+
+    document.addEventListener('mouseup', dragEnd);
+    document.addEventListener('touchend', dragEnd);
+
+    function dragStart(e) {
+      // 버튼이나 링크 클릭 시에는 드래그 시작하지 않음
+      if (e.target.tagName === 'BUTTON' || e.target.tagName === 'A') {
+        return;
+      }
+
+      if (e.type === 'touchstart') {
+        initialX = e.touches[0].clientX - xOffset;
+        initialY = e.touches[0].clientY - yOffset;
+      } else {
+        initialX = e.clientX - xOffset;
+        initialY = e.clientY - yOffset;
+      }
+
+      isDragging = true;
+    }
+
+    function drag(e) {
+      if (isDragging) {
+        e.preventDefault();
+
+        if (e.type === 'touchmove') {
+          currentX = e.touches[0].clientX - initialX;
+          currentY = e.touches[0].clientY - initialY;
+        } else {
+          currentX = e.clientX - initialX;
+          currentY = e.clientY - initialY;
+        }
+
+        xOffset = currentX;
+        yOffset = currentY;
+
+        setTranslate(currentX, currentY, popupContent);
+      }
+    }
+
+    function dragEnd() {
+      initialX = currentX;
+      initialY = currentY;
+      isDragging = false;
+    }
+
+    function setTranslate(xPos, yPos, el) {
+      el.style.transform = `translate(${xPos}px, ${yPos}px)`;
+    }
+
+    // 팝업이 닫힐 때 위치 초기화
+    const closeButtons = recipePopup.querySelectorAll('.close-popup');
+    closeButtons.forEach(button => {
+      button.addEventListener('click', () => {
+        xOffset = 0;
+        yOffset = 0;
+        currentX = 0;
+        currentY = 0;
+        popupContent.style.transform = 'translate(0px, 0px)';
+      });
+    });
+
+    // 팝업 배경 클릭 시 위치 초기화
+    recipePopup.addEventListener('click', (e) => {
+      if (e.target === recipePopup) {
+        xOffset = 0;
+        yOffset = 0;
+        currentX = 0;
+        currentY = 0;
+        popupContent.style.transform = 'translate(0px, 0px)';
+      }
+    });
+  }
+
+  // 확대하기 컨트롤 기능
+  function initZoomControl() {
+    const zoomControl = document.getElementById('zoom-control');
+    const zoomInBtn = document.getElementById('zoom-in');
+    const zoomOutBtn = document.getElementById('zoom-out');
+    const zoomSlider = document.getElementById('zoom-slider');
+    const zoomSliderFill = document.getElementById('zoom-slider-fill');
+    const zoomSliderThumb = document.getElementById('zoom-slider-thumb');
+    const zoomValue = document.getElementById('zoom-value');
+
+    let currentProgress = 0; // 0% ~ 100%
+    let isDraggingSlider = false;
+    let currentVideoElement = null;
+
+    // 줌 진행도 업데이트 함수 (영상 시간을 조절)
+    function updateZoomProgress(progress) {
+      currentProgress = Math.max(0, Math.min(100, progress));
+
+      zoomSliderFill.style.width = currentProgress + '%';
+      zoomSliderThumb.style.left = currentProgress + '%';
+
+      // 줌 배율 계산 (0% = 1.0x, 100% = 3.0x)
+      const zoomLevel = 1.0 + (currentProgress / 100) * 2.0;
+      zoomValue.textContent = zoomLevel.toFixed(1) + 'x';
+
+      // 비디오 시간 조절 (진행도에 따라)
+      if (currentVideoElement && currentVideoElement.duration) {
+        const targetTime = (currentProgress / 100) * currentVideoElement.duration;
+        currentVideoElement.currentTime = targetTime;
+      }
+    }
+
+    // 확대 버튼 (진행도 10% 증가)
+    zoomInBtn.addEventListener('click', () => {
+      updateZoomProgress(currentProgress + 10);
+    });
+
+    // 축소 버튼 (진행도 10% 감소)
+    zoomOutBtn.addEventListener('click', () => {
+      updateZoomProgress(currentProgress - 10);
+    });
+
+    // 슬라이더 클릭
+    zoomSlider.addEventListener('mousedown', startDrag);
+    zoomSlider.addEventListener('touchstart', startDrag);
+
+    function startDrag(e) {
+      isDraggingSlider = true;
+      updateSliderPosition(e);
+    }
+
+    document.addEventListener('mousemove', (e) => {
+      if (isDraggingSlider) {
+        updateSliderPosition(e);
+      }
+    });
+
+    document.addEventListener('touchmove', (e) => {
+      if (isDraggingSlider) {
+        updateSliderPosition(e);
+      }
+    });
+
+    document.addEventListener('mouseup', () => {
+      isDraggingSlider = false;
+    });
+
+    document.addEventListener('touchend', () => {
+      isDraggingSlider = false;
+    });
+
+    function updateSliderPosition(e) {
+      const rect = zoomSlider.getBoundingClientRect();
+      const clientX = e.type.includes('touch') ? e.touches[0].clientX : e.clientX;
+      const x = clientX - rect.left;
+      const percentage = Math.max(0, Math.min(100, (x / rect.width) * 100));
+      updateZoomProgress(percentage);
+    }
+
+    // 컨트롤 표시 함수
+    window.showZoomControl = function(videoElement) {
+      zoomControl.classList.add('active');
+
+      // 전달받은 비디오 요소 저장
+      currentVideoElement = videoElement;
+
+      // 초기 진행도 0으로 설정
+      updateZoomProgress(0);
+
+      console.log('Zoom control UI displayed');
+      console.log('Video duration:', currentVideoElement.duration);
+    };
+
+    // 컨트롤 숨기기 함수
+    window.hideZoomControl = function() {
+      zoomControl.classList.remove('active');
+      currentVideoElement = null;
+      currentProgress = 0;
+    };
+
+    // 다른 탭 클릭 시 줌 컨트롤 숨기기
+    const tabs = document.querySelectorAll('.bottom-bar-item');
+    tabs.forEach(tab => {
+      tab.addEventListener('click', () => {
+        const buttonAlt = tab.querySelector('img').alt;
+        if (buttonAlt !== 'Zoom') {
+          window.hideZoomControl();
+        }
+      });
+    });
+  }
+
+  // 탐색 이미지 뷰 기능
+  function initScanImageView() {
+    const scanImageContainer = document.getElementById('scan-image-container');
+    const selectableAreas = scanImageContainer.querySelectorAll('.selectable-area');
+
+    // 이미지 뷰 표시 함수
+    window.showScanImageView = function() {
+      scanImageContainer.classList.add('active');
+      console.log('Scan image view displayed');
+    };
+
+    // 이미지 뷰 숨기기 함수
+    window.hideScanImageView = function() {
+      scanImageContainer.classList.remove('active');
+      // 모든 영역 선택 해제
+      selectableAreas.forEach(area => {
+        area.classList.remove('selected');
+      });
+      console.log('Scan image view hidden');
+    };
+
+    // 영역 클릭 시 선택/해제
+    selectableAreas.forEach(area => {
+      area.addEventListener('click', () => {
+        const areaName = area.dataset.area;
+
+        // 다른 영역들 선택 해제
+        selectableAreas.forEach(otherArea => {
+          if (otherArea !== area) {
+            otherArea.classList.remove('selected');
+          }
+        });
+
+        // 현재 영역 토글
+        area.classList.toggle('selected');
+
+        if (area.classList.contains('selected')) {
+          console.log(`Selected area: ${areaName}`);
+        } else {
+          console.log(`Deselected area: ${areaName}`);
+        }
+      });
+    });
+
+    // 컨테이너 배경 클릭 시 모든 선택 해제
+    scanImageContainer.addEventListener('click', (e) => {
+      if (e.target === scanImageContainer) {
+        selectableAreas.forEach(area => {
+          area.classList.remove('selected');
+        });
+        console.log('All areas deselected');
+      }
+    });
+
+    // 다른 탭 클릭 시 이미지 뷰 숨기기
+    const tabs = document.querySelectorAll('.bottom-bar-item');
+    tabs.forEach(tab => {
+      tab.addEventListener('click', () => {
+        const buttonAlt = tab.querySelector('img').alt;
+        if (buttonAlt !== 'Scan') {
+          window.hideScanImageView();
+        }
+      });
+    });
+  }
+
 });
