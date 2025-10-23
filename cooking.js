@@ -43,12 +43,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (selectedTab) {
       selectedTab.classList.add('active');
-      selectedTab.style.color = '#F4CF15'; // 활성 탭 텍스트는 #F4CF15
+      selectedTab.style.color = '#fff'; // 활성 탭 텍스트도 흰색 유지
       const img = selectedTab.querySelector('img');
       if (img) {
-        // 활성 탭 아이콘은 activeSrc로 변경
-        img.dataset.originalSrc = img.src; // 현재 src를 originalSrc로 저장
-        img.src = selectedTab.dataset.activeSrc;
+        // 활성 탭 아이콘은 일반 src 유지 (아이콘 변경 안함)
+        // img.dataset.originalSrc = img.src;
+        // img.src = selectedTab.dataset.activeSrc;
       }
 
       // 선택된 탭의 콘텐츠 보이기
