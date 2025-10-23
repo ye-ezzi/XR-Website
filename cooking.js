@@ -77,15 +77,6 @@ document.addEventListener('DOMContentLoaded', () => {
         cursor: pointer;
     `;
   document.body.appendChild(animationContainer);
-  
-  // 애니메이션 컨테이너 클릭 시 닫기
-  animationContainer.addEventListener('click', () => {
-    animationContainer.classList.remove('visible');
-    if (measureAnimation) {
-      measureAnimation.destroy();
-      measureAnimation = null;
-    }
-  });
 
   // 스타일 추가
   const style = document.createElement('style');
@@ -204,6 +195,16 @@ document.addEventListener('DOMContentLoaded', () => {
   tabs.forEach(tab => {
     tab.addEventListener('click', (e) => {
       e.preventDefault(); // 기본 링크 이동 방지
+
+      // 모든 팝업 닫기
+      closeAllPopups();
+
+      // 측정 오버레이 닫기
+      const measureOverlay = document.getElementById('measure-overlay');
+      if (measureOverlay) {
+        measureOverlay.classList.remove('active');
+      }
+
       updateTabState(tab);
 
       // 버튼별로 다른 처리
@@ -297,13 +298,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
       videoElement.addEventListener('ended', () => {
         console.log(`${buttonAlt} video ended`);
-        // Zoom 버튼은 ended 이벤트 없음 (자동재생 안함)
+
         if (buttonAlt === 'Scan') {
-          // Scan은 영상 멈추고 이미지 레이어 표시
+          // Scan (탐색하기): 영상 멈추고 이미지 레이어 + 영역 선택 표시
           videoElement.pause();
           showScanImageView();
-        } else if (buttonAlt !== 'Zoom') {
-          // 나머지는 팝업 표시
+        } else if (buttonAlt === 'Zoom') {
+          // Zoom (확대하기): 아무것도 안함 (컨트롤 UI가 이미 표시됨)
+        } else {
+          // 3D Recipe, Measure, Record: 각각의 팝업 표시
           showTabPopup(buttonAlt);
         }
       });
@@ -333,16 +336,18 @@ document.addEventListener('DOMContentLoaded', () => {
     // 모든 닫기 버튼에 이벤트 리스너 추가
     const closeButtons = document.querySelectorAll('.close-popup');
     closeButtons.forEach(button => {
-      button.addEventListener('click', () => {
+      button.addEventListener('click', (e) => {
+        e.stopPropagation();
         closeAllPopups();
       });
     });
 
-    // 팝업 배경 클릭 시 닫기
+    // 팝업 배경 클릭 시 닫기 (영상 컨테이너는 제외)
     const popups = document.querySelectorAll('.tab-popup');
     popups.forEach(popup => {
       popup.addEventListener('click', (e) => {
         if (e.target === popup) {
+          e.stopPropagation();
           closeAllPopups();
         }
       });
@@ -351,7 +356,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function showTabPopup(buttonAlt) {
     closeAllPopups(); // 기존 팝업 닫기
-    
+
+    // 측정하기는 태그 오버레이 표시
+    if (buttonAlt === 'Measure') {
+      const measureOverlay = document.getElementById('measure-overlay');
+      if (measureOverlay) {
+        measureOverlay.classList.add('active');
+        console.log('Showing measure tag overlay');
+      }
+      return;
+    }
+
     let popupId = '';
     switch(buttonAlt) {
       case 'Scan':
@@ -362,9 +377,6 @@ document.addEventListener('DOMContentLoaded', () => {
         break;
       case 'Zoom':
         popupId = 'zoom-popup';
-        break;
-      case 'Measure':
-        popupId = 'measure-popup';
         break;
       case 'Record':
         popupId = 'record-popup';
@@ -606,44 +618,15 @@ document.addEventListener('DOMContentLoaded', () => {
     // 이미지 뷰 숨기기 함수
     window.hideScanImageView = function() {
       scanImageContainer.classList.remove('active');
-      // 모든 영역 선택 해제
-      selectableAreas.forEach(area => {
-        area.classList.remove('selected');
-      });
       console.log('Scan image view hidden');
     };
 
-    // 영역 클릭 시 선택/해제
+    // 영역 클릭 시 로그만 출력 (탐색하기에서는 팝업 없음)
     selectableAreas.forEach(area => {
       area.addEventListener('click', () => {
         const areaName = area.dataset.area;
-
-        // 다른 영역들 선택 해제
-        selectableAreas.forEach(otherArea => {
-          if (otherArea !== area) {
-            otherArea.classList.remove('selected');
-          }
-        });
-
-        // 현재 영역 토글
-        area.classList.toggle('selected');
-
-        if (area.classList.contains('selected')) {
-          console.log(`Selected area: ${areaName}`);
-        } else {
-          console.log(`Deselected area: ${areaName}`);
-        }
+        console.log(`Clicked area: ${areaName}`);
       });
-    });
-
-    // 컨테이너 배경 클릭 시 모든 선택 해제
-    scanImageContainer.addEventListener('click', (e) => {
-      if (e.target === scanImageContainer) {
-        selectableAreas.forEach(area => {
-          area.classList.remove('selected');
-        });
-        console.log('All areas deselected');
-      }
     });
 
     // 다른 탭 클릭 시 이미지 뷰 숨기기
