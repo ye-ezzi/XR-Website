@@ -6,8 +6,20 @@
   <title>요리 모드</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/lottie-web/5.12.2/lottie.min.js"></script>
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { font-family: system-ui; background: #0f1115; color: #fff; display: flex; flex-direction: column; min-height: 100vh; }
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: system-ui;
+      background: #0f1115;
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
 
     /* Bottom fixed bar */
     .bottom-bar {
@@ -248,6 +260,10 @@
       height: 100%;
       object-fit: cover;
       pointer-events: none;
+      position: absolute;
+      top: 0;
+      left: 0;
+      z-index: 1;
     }
 
     /* 사각형 선택 영역 */
@@ -257,18 +273,14 @@
       cursor: pointer;
       transition: all 0.3s ease;
       pointer-events: auto;
+      z-index: 10;
     }
 
     .selectable-area:hover {
-      border: 2px solid rgba(244, 207, 21, 0.8);
-      background: rgba(244, 207, 21, 0.1);
+      border: 2px solid rgba(255, 255, 255, 0.8);
+      background: rgba(255, 255, 255, 0.05);
     }
 
-    .selectable-area.selected {
-      border: 3px solid rgba(244, 207, 21, 1);
-      background: rgba(244, 207, 21, 0.2);
-      box-shadow: 0 0 20px rgba(244, 207, 21, 0.6);
-    }
 
     /* 선택 정보 팝업 */
     .area-info-popup {
@@ -277,27 +289,28 @@
       left: 50%;
       transform: translateX(-50%);
       padding: 12px 16px;
-      background: rgba(26, 26, 26, 0.95);
+      background: rgba(255, 255, 255, 0.95);
       backdrop-filter: blur(12px);
       border-radius: 10px;
-      border: 1px solid rgba(244, 207, 21, 0.5);
-      color: #fff;
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      color: #1a1a1a;
       white-space: nowrap;
       opacity: 0;
       pointer-events: none;
       transition: all 0.3s ease;
       z-index: 10;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
     }
 
-    .selectable-area:hover .area-info-popup,
-    .selectable-area.selected .area-info-popup {
+    .selectable-area:hover .area-info-popup {
       opacity: 1;
     }
 
     .area-info-popup h4 {
-      color: #F4CF15;
+      color: #1a1a1a;
       font-size: 14px;
       margin: 0;
+      font-weight: 600;
     }
 
     /* 모바일 반응형 */
@@ -329,6 +342,73 @@
       .area-info-popup h4 {
         font-size: 12px;
       }
+    }
+
+    /* 측정하기 태그 오버레이 */
+    .measure-overlay {
+      position: fixed;
+      inset: 0;
+      display: none;
+      z-index: 1500;
+      pointer-events: none;
+    }
+
+    .measure-overlay.active {
+      display: block;
+      pointer-events: auto;
+    }
+
+    /* 측정 태그 */
+    .measure-tag {
+      position: absolute;
+      padding: 8px 12px;
+      background: rgba(26, 26, 26, 0.9);
+      backdrop-filter: blur(12px);
+      border-radius: 8px;
+      border: 1px solid rgba(244, 207, 21, 0.8);
+      color: #fff;
+      font-size: 13px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      pointer-events: auto;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+    }
+
+    .measure-tag:hover {
+      background: rgba(244, 207, 21, 0.2);
+      border-color: rgba(244, 207, 21, 1);
+      transform: scale(1.05);
+    }
+
+    .measure-tag-title {
+      font-weight: 600;
+      color: #F4CF15;
+      margin-bottom: 4px;
+    }
+
+    .measure-tag-weight {
+      font-size: 12px;
+      opacity: 0.9;
+    }
+
+    .measure-tag-btn {
+      margin-top: 8px;
+      padding: 6px 10px;
+      background: rgba(244, 207, 21, 0.3);
+      border: 1px solid rgba(244, 207, 21, 0.6);
+      border-radius: 6px;
+      color: #F4CF15;
+      font-size: 11px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      width: 100%;
+      text-align: center;
+    }
+
+    .measure-tag-btn:hover {
+      background: rgba(244, 207, 21, 0.5);
+      border-color: rgba(244, 207, 21, 1);
     }
 
     /* 확대하기 컨트롤 UI */
@@ -498,7 +578,7 @@
     <img id="scan-image" src="/images/Screen.png" alt="Scan View" />
 
     <!-- 선택 가능한 영역들 -->
-    <div class="selectable-area" data-area="microwave" style="top: 25%; left: 15%; width: 20%; height: 25%;">
+    <div class="selectable-area" data-area="microwave" style="top: calc(25% - 200px); left: calc(15% + 200px); width: calc(25% - 100px); height: 25%;">
       <div class="area-info-popup">
         <h4>🔥 전자레인지</h4>
       </div>
@@ -509,22 +589,16 @@
         <h4>❄️ 냉장고</h4>
       </div>
     </div>
-
-    <div class="selectable-area" data-area="bowl" style="bottom: 30%; left: 40%; width: 15%; height: 18%;">
-      <div class="area-info-popup">
-        <h4>🍽️ 탁자 위 그릇</h4>
-      </div>
-    </div>
   </div>
 
   <div id="3d-receipt-popup" class="tab-popup" style="display: none;">
-    <div class="popup-content recipe-popup" style="max-height: 80vh; overflow-y: auto; cursor: move; position: relative;">
-      <button class="popup-close-btn" onclick="document.getElementById('3d-receipt-popup').style.display='none'">×</button>
-      <h3>🍝 토마토 스파게티 레시피</h3>
+    <div class="popup-content recipe-popup" style="max-height: 80vh; overflow-y: auto; cursor: move; position: relative; max-width: 416px; padding: 16px;">
+      <button class="popup-close-btn" onclick="document.getElementById('3d-receipt-popup').style.display='none'" style="top: 12px; right: 12px; width: 26px; height: 26px; font-size: 18px;">×</button>
+      <h3 style="font-size: 16px; margin-bottom: 12px;">🍝 토마토 스파게티 레시피</h3>
 
-      <div style="text-align: left; margin: 20px 0;">
-        <h4 style="color: #F4CF15; margin-bottom: 10px;">재료 (2인분)</h4>
-        <ul style="list-style: none; padding-left: 0; opacity: 0.9;">
+      <div style="text-align: left; margin: 16px 0;">
+        <h4 style="color: #F4CF15; margin-bottom: 8px; font-size: 13px;">재료 (2인분)</h4>
+        <ul style="list-style: none; padding-left: 0; opacity: 0.9; font-size: 11px; line-height: 1.6;">
           <li>• 스파게티 면 200g</li>
           <li>• 토마토 소스 400ml</li>
           <li>• 마늘 3쪽</li>
@@ -536,9 +610,9 @@
         </ul>
       </div>
 
-      <div style="text-align: left; margin: 20px 0;">
-        <h4 style="color: #F4CF15; margin-bottom: 10px;">조리 순서</h4>
-        <ol style="padding-left: 20px; opacity: 0.9; line-height: 1.8;">
+      <div style="text-align: left; margin: 16px 0;">
+        <h4 style="color: #F4CF15; margin-bottom: 8px; font-size: 13px;">조리 순서</h4>
+        <ol style="padding-left: 16px; opacity: 0.9; line-height: 1.6; font-size: 11px;">
           <li>큰 냄비에 물을 끓이고 소금을 넣은 후 스파게티 면을 8-10분간 삶습니다.</li>
           <li>마늘과 양파를 잘게 다집니다.</li>
           <li>팬에 올리브유를 두르고 마늘과 양파를 볶습니다.</li>
@@ -549,17 +623,27 @@
         </ol>
       </div>
 
-      <div style="text-align: left; margin: 20px 0; padding: 15px; background: rgba(244, 207, 21, 0.1); border-radius: 8px;">
-        <h4 style="color: #F4CF15; margin-bottom: 8px;">💡 팁</h4>
-        <p style="opacity: 0.9; margin: 0; font-size: 13px;">
+      <div style="text-align: left; margin: 16px 0; padding: 12px; background: rgba(244, 207, 21, 0.1); border-radius: 6px;">
+        <h4 style="color: #F4CF15; margin-bottom: 6px; font-size: 12px;">💡 팁</h4>
+        <p style="opacity: 0.9; margin: 0; font-size: 11px; line-height: 1.5;">
           면을 삶을 때 물에 소금을 충분히 넣으면 더 맛있습니다.
           면수를 조금 남겨두었다가 소스에 추가하면 더 부드러운 맛을 낼 수 있습니다.
         </p>
       </div>
 
-      <div class="popup-actions">
-        <button class="close-popup primary">확인</button>
+      <div class="popup-actions" style="margin-top: 16px;">
+        <button class="close-popup primary" style="padding: 8px 12px; font-size: 12px;">확인</button>
       </div>
+    </div>
+  </div>
+
+  <!-- 측정하기 태그 오버레이 -->
+  <div id="measure-overlay" class="measure-overlay">
+    <!-- 양파 태그 -->
+    <div class="measure-tag" style="top: 40%; left: 50%; transform: translate(-50%, -50%);">
+      <div class="measure-tag-title">🧅 양파</div>
+      <div class="measure-tag-weight">300g</div>
+      <button class="measure-tag-btn" onclick="showNutritionFromTag()">데이터 저장</button>
     </div>
   </div>
 
@@ -621,6 +705,53 @@
     </div>
   </div>
 
+  <!-- 영양소 분석 팝업 -->
+  <div id="nutrition-popup" class="tab-popup" style="display: none;">
+    <div class="popup-content" style="max-width: 500px; position: relative; padding: 20px;">
+      <button class="popup-close-btn" onclick="closeNutritionPopup()">×</button>
+      <h3 style="font-size: 18px; margin-bottom: 20px; text-align: center;">🥦 식재료 영양소 분석</h3>
+
+      <!-- 브로콜리 정보 -->
+      <div style="margin-bottom: 20px; padding: 16px; background: rgba(255,255,255,0.05); border-radius: 12px; border: 1px solid rgba(255,255,255,0.1);">
+        <h4 style="color: #4CAF50; margin-bottom: 12px; font-size: 15px;">🥦 브로콜리 (100g)</h4>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 13px;">
+          <div><span style="opacity: 0.7;">칼로리:</span> <strong>34 kcal</strong></div>
+          <div><span style="opacity: 0.7;">단백질:</span> <strong>2.8g</strong></div>
+          <div><span style="opacity: 0.7;">탄수화물:</span> <strong>6.6g</strong></div>
+          <div><span style="opacity: 0.7;">지방:</span> <strong>0.4g</strong></div>
+          <div><span style="opacity: 0.7;">식이섬유:</span> <strong>2.6g</strong></div>
+          <div><span style="opacity: 0.7;">비타민C:</span> <strong>89.2mg</strong></div>
+        </div>
+      </div>
+
+      <!-- 양파 정보 -->
+      <div style="margin-bottom: 20px; padding: 16px; background: rgba(255,255,255,0.05); border-radius: 12px; border: 1px solid rgba(255,255,255,0.1);">
+        <h4 style="color: #DDA15E; margin-bottom: 12px; font-size: 15px;">🧅 양파 (100g)</h4>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 13px;">
+          <div><span style="opacity: 0.7;">칼로리:</span> <strong>40 kcal</strong></div>
+          <div><span style="opacity: 0.7;">단백질:</span> <strong>1.1g</strong></div>
+          <div><span style="opacity: 0.7;">탄수화물:</span> <strong>9.3g</strong></div>
+          <div><span style="opacity: 0.7;">지방:</span> <strong>0.1g</strong></div>
+          <div><span style="opacity: 0.7;">식이섬유:</span> <strong>1.7g</strong></div>
+          <div><span style="opacity: 0.7;">비타민C:</span> <strong>7.4mg</strong></div>
+        </div>
+      </div>
+
+      <!-- 추천 레시피 -->
+      <div style="padding: 16px; background: rgba(244, 207, 21, 0.1); border-radius: 12px; border: 1px solid rgba(244, 207, 21, 0.3); margin-bottom: 20px;">
+        <h4 style="color: #F4CF15; margin-bottom: 10px; font-size: 14px;">💡 추천 레시피</h4>
+        <p style="font-size: 13px; opacity: 0.9; line-height: 1.6; margin: 0;">
+          브로콜리와 양파를 활용한 건강한 볶음 요리, 샐러드, 수프 등을 만들어보세요!
+        </p>
+      </div>
+
+      <div class="popup-actions">
+        <button class="close-popup" onclick="closeNutritionPopup()">닫기</button>
+        <button class="close-popup primary" onclick="goToRecipeSearch()">레시피 탐색</button>
+      </div>
+    </div>
+  </div>
+
   <div class="bottom-bar">
     <a href="#" class="bottom-bar-item" data-active-src="/images/Scan_active.svg" data-target-content="scan-content">
       <img src="/images/Scan.svg" alt="Scan" />
@@ -670,6 +801,41 @@
 
       // 저장 완료 팝업 표시
       document.getElementById('save-success-popup').style.display = 'flex';
+    }
+
+    // 영양소 분석 팝업 표시 함수
+    function showNutritionPopup() {
+      // Screen.png 이미지 숨기기
+      if (window.hideScanImageView) {
+        window.hideScanImageView();
+      }
+      // 영양소 팝업 표시
+      document.getElementById('nutrition-popup').style.display = 'flex';
+      console.log('Nutrition analysis popup displayed');
+    }
+
+    // 영양소 분석 팝업 닫기
+    function closeNutritionPopup() {
+      document.getElementById('nutrition-popup').style.display = 'none';
+      console.log('Nutrition popup closed');
+    }
+
+    // 레시피 탐색 페이지로 이동
+    function goToRecipeSearch() {
+      console.log('Going to recipe search...');
+      // 팝업 닫기
+      closeNutritionPopup();
+      // 여기에 레시피 탐색 페이지로 이동하는 로직 추가 가능
+      alert('레시피 탐색 기능이 곧 추가됩니다!');
+    }
+
+    // 측정하기 태그에서 영양소 팝업 표시
+    function showNutritionFromTag() {
+      // 측정 오버레이 숨기기
+      document.getElementById('measure-overlay').classList.remove('active');
+      // 영양소 팝업 표시
+      document.getElementById('nutrition-popup').style.display = 'flex';
+      console.log('Nutrition popup shown from measure tag');
     }
   </script>
 </body>
