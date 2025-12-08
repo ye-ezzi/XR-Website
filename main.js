@@ -300,6 +300,7 @@ class ModelViewer {
       object-fit: cover;
       transform: scale(1);
       transform-origin: center;
+      outline: none;
     `;
     
     container.appendChild(this.movementVideo);
@@ -323,9 +324,15 @@ class ModelViewer {
   }
 
   stopMovementAnimation() {
-    // 아무것도 하지 않음 - 애니메이션은 이미 마지막 프레임에서 정지되어 있고
-    // 컨테이너도 계속 표시되어 마지막 프레임이 팝업과 함께 보임
-    console.log('Movement animation remains visible at final frame');
+    const container = document.getElementById('movementAnimation');
+    if (container) {
+      container.classList.remove('visible');
+    }
+    if (this.movementVideo) {
+      this.movementVideo.pause();
+      this.movementVideo.currentTime = 0;
+    }
+    console.log('Movement animation stopped and hidden');
   }
 
   rotateModelLeftRight() {

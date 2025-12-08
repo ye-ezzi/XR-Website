@@ -178,10 +178,10 @@ document.addEventListener('DOMContentLoaded', () => {
     });
     
     videoElement.addEventListener('ended', () => {
-      console.log('Explore video ended - showing scan image overlay');
-      // 영상을 마지막 프레임에서 멈추고 이미지 레이어를 위에 표시
+      console.log('Explore video ended - video remains visible');
+      // 영상을 마지막 프레임에서 멈춤
       videoElement.pause();
-      showScanImageView();
+      // showScanImageView() 호출 제거 - 이미지 오버레이 표시 안함
     });
     
     videoElement.addEventListener('error', (e) => {
@@ -300,9 +300,9 @@ document.addEventListener('DOMContentLoaded', () => {
         console.log(`${buttonAlt} video ended`);
 
         if (buttonAlt === 'Scan') {
-          // Scan (탐색하기): 영상 멈추고 이미지 레이어 + 영역 선택 표시
+          // Scan (탐색하기): 영상 멈춤 (이미지 오버레이 표시 안함)
           videoElement.pause();
-          showScanImageView();
+          // showScanImageView() 호출 제거
         } else if (buttonAlt === 'Zoom') {
           // Zoom (확대하기): 아무것도 안함 (컨트롤 UI가 이미 표시됨)
         } else {
