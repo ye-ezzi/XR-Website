@@ -316,23 +316,18 @@ class ModelViewer {
     
     // 비디오 종료 후 마지막 프레임 유지
     this.movementVideo.addEventListener('ended', () => {
-      console.log('Movement video ended - keeping last frame');
-      // 비디오가 끝나면 마지막 프레임에서 정지
+      console.log('Movement video ended - paused on last frame');
+      // 비디오를 명시적으로 일시정지하여 마지막 프레임 유지
+      this.movementVideo.pause();
     });
         
     console.log('Movement video started');
   }
 
   stopMovementAnimation() {
-    const container = document.getElementById('movementAnimation');
-    if (container) {
-      container.classList.remove('visible');
-    }
-    if (this.movementVideo) {
-      this.movementVideo.pause();
-      this.movementVideo.currentTime = 0;
-    }
-    console.log('Movement animation stopped and hidden');
+    // 비디오를 숨기지 않고 마지막 프레임에서 정지 상태 유지
+    // 컨테이너는 visible 상태로 유지하여 마지막 프레임이 보이도록 함
+    console.log('Movement animation stopped - keeping last frame visible');
   }
 
   rotateModelLeftRight() {
@@ -374,15 +369,8 @@ class ModelViewer {
         const modal = document.getElementById('cookingModal');
         if (modal) modal.style.display = 'flex';
 
-        const startBtn = document.getElementById('cookStart');
-        if (startBtn) {
-          startBtn.onclick = () => { 
-            // 팝업 즉시 숨기기
-            if (modal) modal.style.display = 'none';
-            // 페이지 이동
-            window.location.href = new URL('./cook.html', window.location.origin).href; 
-          };
-        }
+        // 모달 단계 관리
+        this.setupModalSteps();
       });
   }
 
@@ -701,6 +689,74 @@ class ModelViewer {
     window.addEventListener('resize', () => {
       svg.setAttribute('viewBox', '0 0 100 100');
     }, { once: true });
+  }
+
+  setupModalSteps() {
+    let currentStep = 1;
+    const totalSteps = 3;
+
+    const modalTitle = document.querySelector('.modal-title');
+    const modalDescription = document.querySelector('.modal-description');
+    const modalImage = document.querySelector('.cooking-image');
+    const dots = document.querySelectorAll('.dot');
+    const nextButton = document.getElementById('cookStart');
+
+    // 각 단계별 내용
+    const steps = [
+      {
+        title: '상황에 맞는 레시피로 누구나<br>만들 수 있는 요리를 추천해드려요.',
+        description: '내가 가진 재료와 도구로 만드는 요리를 만들어보세요.',
+        image: '/images/modal step 1.png',
+        buttonText: '다음'
+      },
+      {
+        title: '재료 크기부터 영양 성분까지<br>카메라로 한 번에 측정해요.',
+        description: '재료를 분석해 재료에 맞는 레시피를 만들어보세요.',
+        image: '/images/modal step 2.png',
+        buttonText: '다음'
+      },
+      {
+        title: '요리하는 모든 과정을<br>사진과 영상으로 기록해요.',
+        description: '나의 요리 과정을 기록하고 언제든 다시 꺼내볼 수 있어요.',
+        image: '/images/modal step 3.png',
+        buttonText: '요리모드 시작하기'
+      }
+    ];
+
+    // 단계 업데이트 함수
+    const updateStep = (step) => {
+      const stepData = steps[step - 1];
+
+      // 내용 업데이트
+      if (modalTitle) modalTitle.innerHTML = stepData.title;
+      if (modalDescription) modalDescription.textContent = stepData.description;
+      if (modalImage) modalImage.src = stepData.image;
+      if (nextButton) nextButton.textContent = stepData.buttonText;
+
+      // 도트 업데이트
+      dots.forEach((dot, index) => {
+        if (index === step - 1) {
+          dot.classList.add('active');
+        } else {
+          dot.classList.remove('active');
+        }
+      });
+    };
+
+    // 다음 버튼 클릭 이벤트
+    if (nextButton) {
+      nextButton.onclick = () => {
+        if (currentStep < totalSteps) {
+          currentStep++;
+          updateStep(currentStep);
+        } else {
+          // 마지막 단계에서 cook.html로 이동
+          const modal = document.getElementById('cookingModal');
+          if (modal) modal.style.display = 'none';
+          window.location.href = new URL('./cook.html', window.location.origin).href;
+        }
+      };
+    }
   }
 }
 

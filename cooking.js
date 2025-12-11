@@ -178,10 +178,21 @@ document.addEventListener('DOMContentLoaded', () => {
     });
     
     videoElement.addEventListener('ended', () => {
-      console.log('Explore video ended - video remains visible');
+      console.log('Explore video ended - showing recipe popups');
       // 영상을 마지막 프레임에서 멈춤
       videoElement.pause();
-      // showScanImageView() 호출 제거 - 이미지 오버레이 표시 안함
+
+      // 전자레인지 팝업 표시
+      const microwavePopup = document.getElementById('microwavePopup');
+      if (microwavePopup) {
+        microwavePopup.style.display = 'flex';
+      }
+
+      // 냉장고 팝업 표시
+      const fridgePopup = document.getElementById('fridgePopup');
+      if (fridgePopup) {
+        fridgePopup.style.display = 'flex';
+      }
     });
     
     videoElement.addEventListener('error', (e) => {
@@ -352,6 +363,46 @@ document.addEventListener('DOMContentLoaded', () => {
         }
       });
     });
+
+    // 전자레인지 팝업 클릭 시 닫기
+    const microwavePopup = document.getElementById('microwavePopup');
+    if (microwavePopup) {
+      microwavePopup.addEventListener('click', (e) => {
+        // 팝업 배경 클릭 시에만 닫기
+        if (e.target === microwavePopup) {
+          microwavePopup.style.display = 'none';
+        }
+      });
+
+      // 레시피 카드 클릭 시 닫기
+      const microwaveCard = microwavePopup.querySelector('.recipe-card');
+      if (microwaveCard) {
+        microwaveCard.addEventListener('click', () => {
+          microwavePopup.style.display = 'none';
+          console.log('Microwave recipe card clicked - popup closed');
+        });
+      }
+    }
+
+    // 냉장고 팝업 클릭 시 닫기
+    const fridgePopup = document.getElementById('fridgePopup');
+    if (fridgePopup) {
+      fridgePopup.addEventListener('click', (e) => {
+        // 팝업 배경 클릭 시에만 닫기
+        if (e.target === fridgePopup) {
+          fridgePopup.style.display = 'none';
+        }
+      });
+
+      // 레시피 카드 클릭 시 닫기
+      const fridgeCard = fridgePopup.querySelector('.recipe-card');
+      if (fridgeCard) {
+        fridgeCard.addEventListener('click', () => {
+          fridgePopup.style.display = 'none';
+          console.log('Fridge recipe card clicked - popup closed');
+        });
+      }
+    }
   }
 
   function showTabPopup(buttonAlt) {
@@ -367,13 +418,17 @@ document.addEventListener('DOMContentLoaded', () => {
       return;
     }
 
+    // 3D Recipe는 캐러셀 표시
+    if (buttonAlt === '3D Receipt') {
+      showRecipeCarousel();
+      console.log('Showing recipe carousel');
+      return;
+    }
+
     let popupId = '';
     switch(buttonAlt) {
       case 'Scan':
         popupId = 'scan-popup';
-        break;
-      case '3D Receipt':
-        popupId = '3d-receipt-popup';
         break;
       case 'Zoom':
         popupId = 'zoom-popup';
@@ -398,6 +453,18 @@ document.addEventListener('DOMContentLoaded', () => {
     popups.forEach(popup => {
       popup.style.display = 'none';
     });
+
+    // 전자레인지 팝업 닫기
+    const microwavePopup = document.getElementById('microwavePopup');
+    if (microwavePopup) {
+      microwavePopup.style.display = 'none';
+    }
+
+    // 냉장고 팝업 닫기
+    const fridgePopup = document.getElementById('fridgePopup');
+    if (fridgePopup) {
+      fridgePopup.style.display = 'none';
+    }
   }
 
   // 드래그 가능한 팝업 기능
@@ -640,5 +707,70 @@ document.addEventListener('DOMContentLoaded', () => {
       });
     });
   }
+
+  // ========== Recipe Carousel Functions ==========
+  let currentRecipeIndex = 0;
+  const totalRecipes = 5;
+
+  window.showRecipeCarousel = function() {
+    const overlay = document.getElementById('recipe-carousel-overlay');
+    overlay.classList.add('active');
+    updateCarouselCards();
+  };
+
+  window.closeRecipeCarousel = function() {
+    const overlay = document.getElementById('recipe-carousel-overlay');
+    overlay.classList.remove('active');
+  };
+
+  window.nextRecipe = function() {
+    currentRecipeIndex = (currentRecipeIndex + 1) % totalRecipes;
+    updateCarouselCards();
+  };
+
+  window.previousRecipe = function() {
+    currentRecipeIndex = (currentRecipeIndex - 1 + totalRecipes) % totalRecipes;
+    updateCarouselCards();
+  };
+
+  function updateCarouselCards() {
+    const cards = document.querySelectorAll('.recipe-carousel-card');
+
+    cards.forEach((card) => {
+      const cardIndex = parseInt(card.getAttribute('data-index'));
+
+      // 현재 인덱스를 기준으로 상대적 위치 계산
+      let relativePosition = (cardIndex - currentRecipeIndex + totalRecipes) % totalRecipes;
+
+      // 클래스 초기화
+      card.classList.remove('center', 'left', 'right', 'hidden');
+
+      // 위치에 따라 클래스 추가
+      if (relativePosition === 0) {
+        card.classList.add('center');
+      } else if (relativePosition === 1) {
+        card.classList.add('right');
+      } else if (relativePosition === totalRecipes - 1) {
+        card.classList.add('left');
+      } else {
+        card.classList.add('hidden');
+      }
+    });
+  }
+
+  // 카드 클릭 시 중앙으로 이동
+  document.querySelectorAll('.recipe-carousel-card').forEach((card) => {
+    card.addEventListener('click', function() {
+      if (!this.classList.contains('center')) {
+        const cardIndex = parseInt(this.getAttribute('data-index'));
+        currentRecipeIndex = cardIndex;
+        updateCarouselCards();
+      } else {
+        // 중앙 카드 클릭 시 레시피 상세 보기 (기존 팝업 활용)
+        closeRecipeCarousel();
+        document.getElementById('3d-receipt-popup').style.display = 'flex';
+      }
+    });
+  });
 
 });

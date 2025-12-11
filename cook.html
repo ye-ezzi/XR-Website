@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>요리 모드</title>
+  <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css" />
   <script src="https://cdnjs.cloudflare.com/ajax/libs/lottie-web/5.12.2/lottie.min.js"></script>
   <style>
     * {
@@ -18,7 +19,7 @@
     }
 
     body {
-      font-family: system-ui;
+      font-family: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, system-ui, Roboto, "Helvetica Neue", "Segoe UI", "Apple SD Gothic Neo", "Noto Sans KR", "Malgun Gothic", "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", sans-serif;
       background: #0f1115;
       color: #fff;
       display: flex;
@@ -664,6 +665,637 @@
       }
     }
 
+    /* Recipe Popup Styles */
+    .recipe-popup {
+      position: fixed;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      z-index: 10000;
+      pointer-events: none;
+      gap: 24px;
+    }
+
+    /* Microwave popup positioning - 전자레인지 위치 (오른쪽) */
+    #microwavePopup {
+      right: 15%;
+      top: 50%;
+      transform: translateY(-50%);
+    }
+
+    /* Fridge popup positioning - 냉장고 위치 (왼쪽) */
+    #fridgePopup {
+      left: 30%;
+      top: 20%;
+      transform: translateY(-50%);
+    }
+
+    /* Circular Indicator */
+    .popup-indicator {
+      position: relative;
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(255, 255, 255, 0.08);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-radius: 50%;
+    }
+
+    /* 바깥 원 - 그라데이션 border */
+    .indicator-ring {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.08);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(12px);
+    }
+
+    /* 바깥 원 그라데이션 border */
+    .indicator-ring::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: 50%;
+      padding: 1px;
+      background: linear-gradient(135deg,
+        rgba(255, 255, 255, 0.4) 0%,
+        rgba(255, 255, 255, 0.1) 50%,
+        rgba(255, 255, 255, 0.4) 100%);
+      -webkit-mask:
+        linear-gradient(#fff 0 0) content-box,
+        linear-gradient(#fff 0 0);
+      mask:
+        linear-gradient(#fff 0 0) content-box,
+        linear-gradient(#fff 0 0);
+      -webkit-mask-composite: xor;
+      mask-composite: exclude;
+      pointer-events: none;
+    }
+
+    /* 중간 원 - 그라데이션 border */
+    .indicator-ring::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 40%;
+      height: 40%;
+      border-radius: 50%;
+      /* 중간 원 배경 투명도 조절 (0.05 = 5% 투명도) */
+      background: rgba(255, 255, 255, 0.02);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      padding: 1px;
+      background-clip: padding-box;
+      border: 1px solid transparent;
+      background-image:
+        /* 중간 원 내부 배경색 투명도 (0.05 = 5% 투명도) */
+        linear-gradient(rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.05)),
+        /* 중간 원 테두리 그라데이션 투명도 조절 */
+        linear-gradient(135deg,
+          rgba(255, 255, 255, 0.6) 0%,    /* 시작 투명도 60% */
+          rgba(255, 255, 255, 0.2) 50%,   /* 중간 투명도 20% */
+          rgba(255, 255, 255, 0.6) 100%); /* 끝 투명도 60% */
+      background-origin: border-box;
+      background-clip: padding-box, border-box;
+    }
+
+    .indicator-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.9);
+      box-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
+      position: relative;
+      z-index: 1;
+    }
+
+    .recipe-popup[style*="display: flex"],
+    .recipe-popup[style*="display:flex"] {
+      pointer-events: auto;
+    }
+
+    .recipe-card {
+      width: auto;
+      max-width: 600px;
+      min-width: 400px;
+      height: auto;
+      background: rgba(255, 255, 255, 0.08);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-radius: 24px;
+      display: flex;
+      overflow: hidden;
+      position: relative;
+      cursor: pointer;
+      transition: transform 0.2s ease;
+    }
+
+    .recipe-card:hover {
+      transform: scale(1.02);
+    }
+
+    /* Glass border using mask */
+    .recipe-card::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: 24px;
+      padding: 1px;
+      background: linear-gradient(135deg,
+        rgba(255, 255, 255, 0.4) 0%,
+        rgba(255, 255, 255, 0.1) 50%,
+        rgba(255, 255, 255, 0.4) 100%);
+      -webkit-mask:
+        linear-gradient(#fff 0 0) content-box,
+        linear-gradient(#fff 0 0);
+      -webkit-mask-composite: xor;
+      mask-composite: exclude;
+      pointer-events: none;
+    }
+
+    .recipe-image {
+      width: auto;
+      height: auto;
+      max-width: 200px;
+      max-height: 200px;
+      object-fit: cover;
+      flex-shrink: 0;
+    }
+
+    .recipe-content {
+      flex: 1;
+      padding: 20px 24px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 6px;
+      min-width: 0;
+    }
+
+    .recipe-title {
+      font-size: 22px;
+      font-weight: 600;
+      color: #fff;
+      margin: 0;
+      white-space: nowrap;
+    }
+
+    .recipe-subtitle {
+      font-size: 15px;
+      font-weight: 500;
+      color: rgba(255, 255, 255, 0.8);
+      margin: 2px 0 6px 0;
+      white-space: nowrap;
+    }
+
+    .recipe-tags {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      margin-top: 2px;
+    }
+
+    .recipe-tag {
+      padding: 5px 10px;
+      background: rgba(0, 0, 17, 0.132);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border-radius: 16px;
+      font-size: 14px;
+      font-weight: 500;
+      color: rgba(255, 255, 255, 0.9);
+      border: none;
+      white-space: nowrap;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Recipe tag gradient border */
+    .recipe-tag::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: 16px;
+      padding: 1px;
+      background: linear-gradient(135deg,
+        rgb(255, 255, 255) 0%,
+        rgba(255, 255, 255, 0.08) 50%,
+        rgba(255, 255, 255, 0.467) 100%);
+      -webkit-mask:
+        linear-gradient(#fff 0 0) content-box,
+        linear-gradient(#fff 0 0);
+      mask:
+        linear-gradient(#fff 0 0) content-box,
+        linear-gradient(#fff 0 0);
+      -webkit-mask-composite: xor;
+      mask-composite: exclude;
+      pointer-events: none;
+    }
+
+    /* 3D Recipe Carousel Styles */
+    .recipe-carousel-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.7);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 10000;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+
+    .recipe-carousel-overlay.active {
+      display: flex;
+      opacity: 1;
+    }
+
+    .recipe-carousel-container {
+      width: 100%;
+      max-width: 1200px;
+      height: 70vh;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      perspective: 1500px;
+    }
+
+    .recipe-carousel-track {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .recipe-carousel-card {
+      position: absolute;
+      width: 500px;
+      height: 600px;
+      background: rgba(255, 255, 255, 0.08);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-radius: 24px;
+      overflow: hidden;
+      cursor: pointer;
+      transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+      transform-style: preserve-3d;
+    }
+
+    /* Card gradient border */
+    .recipe-carousel-card::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: 24px;
+      padding: 1px;
+      background: linear-gradient(135deg,
+        rgba(255, 255, 255, 0.4) 0%,
+        rgba(255, 255, 255, 0.1) 50%,
+        rgba(255, 255, 255, 0.4) 100%);
+      -webkit-mask:
+        linear-gradient(#fff 0 0) content-box,
+        linear-gradient(#fff 0 0);
+      mask:
+        linear-gradient(#fff 0 0) content-box,
+        linear-gradient(#fff 0 0);
+      -webkit-mask-composite: xor;
+      mask-composite: exclude;
+      pointer-events: none;
+    }
+
+    /* Center card (active) */
+    .recipe-carousel-card.center {
+      transform: translateX(0) scale(1) rotateY(0deg);
+      opacity: 1;
+      z-index: 3;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+    }
+
+    /* Left card */
+    .recipe-carousel-card.left {
+      transform: translateX(-450px) scale(0.85) rotateY(25deg);
+      opacity: 0.6;
+      z-index: 1;
+      filter: brightness(0.7);
+    }
+
+    /* Right card */
+    .recipe-carousel-card.right {
+      transform: translateX(450px) scale(0.85) rotateY(-25deg);
+      opacity: 0.6;
+      z-index: 1;
+      filter: brightness(0.7);
+    }
+
+    /* Hidden cards */
+    .recipe-carousel-card.hidden {
+      transform: scale(0.5);
+      opacity: 0;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .recipe-card-image {
+      width: 100%;
+      height: 65%;
+      object-fit: cover;
+    }
+
+    .recipe-card-info {
+      padding: 24px;
+      height: 35%;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .recipe-card-title {
+      font-size: 28px;
+      font-weight: 600;
+      color: #fff;
+      margin-bottom: 8px;
+    }
+
+    .recipe-card-description {
+      font-size: 14px;
+      color: rgba(255, 255, 255, 0.7);
+      margin-bottom: 12px;
+      line-height: 1.4;
+    }
+
+    .recipe-card-meta {
+      font-size: 13px;
+      color: rgba(255, 255, 255, 0.5);
+    }
+
+    .carousel-navigation {
+      position: absolute;
+      width: 100%;
+      top: 50%;
+      transform: translateY(-50%);
+      display: flex;
+      justify-content: space-between;
+      padding: 0 40px;
+      pointer-events: none;
+      z-index: 10;
+    }
+
+    .carousel-nav-btn {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border: none;
+      color: #fff;
+      font-size: 24px;
+      cursor: pointer;
+      pointer-events: auto;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .carousel-nav-btn:hover {
+      background: rgba(255, 255, 255, 0.2);
+      transform: scale(1.1);
+    }
+
+    .carousel-close-btn {
+      position: absolute;
+      top: 30px;
+      right: 30px;
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border: none;
+      color: #fff;
+      font-size: 24px;
+      cursor: pointer;
+      z-index: 20;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .carousel-close-btn:hover {
+      background: rgba(255, 255, 255, 0.2);
+      transform: scale(1.1);
+    }
+
+    /* Responsive styles */
+    @media (max-width: 768px) {
+      /* Recipe Carousel Mobile */
+      .recipe-carousel-card {
+        width: 350px;
+        height: 500px;
+      }
+
+      .recipe-carousel-card.left {
+        transform: translateX(-300px) scale(0.75) rotateY(20deg);
+      }
+
+      .recipe-carousel-card.right {
+        transform: translateX(300px) scale(0.75) rotateY(-20deg);
+      }
+
+      .recipe-card-title {
+        font-size: 24px;
+      }
+
+      .recipe-card-description {
+        font-size: 13px;
+      }
+
+      .carousel-navigation {
+        padding: 0 20px;
+      }
+
+      .carousel-nav-btn {
+        width: 40px;
+        height: 40px;
+        font-size: 20px;
+      }
+
+      .carousel-close-btn {
+        top: 20px;
+        right: 20px;
+        width: 40px;
+        height: 40px;
+        font-size: 20px;
+      }
+
+      .recipe-card {
+        width: auto;
+        max-width: calc(100vw - 40px);
+        min-width: 300px;
+        height: auto;
+      }
+
+      .recipe-image {
+        width: auto;
+        height: auto;
+        max-width: 140px;
+        max-height: 140px;
+      }
+
+      .recipe-content {
+        padding: 14px 18px;
+      }
+
+      .recipe-title {
+        font-size: 18px;
+      }
+
+      .recipe-subtitle {
+        font-size: 13px;
+      }
+
+      .recipe-tag {
+        padding: 4px 9px;
+        font-size: 11px;
+      }
+
+      /* 모바일에서는 상하 배치 */
+      #microwavePopup {
+        right: 50%;
+        top: 20%;
+        transform: translateX(50%);
+      }
+
+      #fridgePopup {
+        left: 50%;
+        top: auto;
+        bottom: 15%;
+        transform: translateX(-50%);
+      }
+
+      .popup-indicator {
+        width: 60px;
+        height: 60px;
+      }
+
+      .indicator-dot {
+        width: 12px;
+        height: 12px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      /* Recipe Carousel Small Mobile */
+      .recipe-carousel-card {
+        width: 280px;
+        height: 420px;
+      }
+
+      .recipe-carousel-card.left {
+        transform: translateX(-250px) scale(0.7) rotateY(15deg);
+      }
+
+      .recipe-carousel-card.right {
+        transform: translateX(250px) scale(0.7) rotateY(-15deg);
+      }
+
+      .recipe-card-title {
+        font-size: 20px;
+      }
+
+      .recipe-card-description {
+        font-size: 12px;
+      }
+
+      .recipe-card-meta {
+        font-size: 11px;
+      }
+
+      .recipe-card-image {
+        height: 60%;
+      }
+
+      .recipe-card-info {
+        height: 40%;
+        padding: 16px;
+      }
+
+      .carousel-navigation {
+        padding: 0 10px;
+      }
+
+      .carousel-nav-btn {
+        width: 36px;
+        height: 36px;
+        font-size: 18px;
+      }
+
+      .carousel-close-btn {
+        top: 15px;
+        right: 15px;
+        width: 36px;
+        height: 36px;
+        font-size: 18px;
+      }
+
+      .recipe-card {
+        width: auto;
+        max-width: calc(100vw - 32px);
+        min-width: 280px;
+        height: auto;
+      }
+
+      .recipe-image {
+        width: auto;
+        height: auto;
+        max-width: 110px;
+        max-height: 110px;
+      }
+
+      .recipe-content {
+        padding: 12px 14px;
+      }
+
+      .recipe-title {
+        font-size: 16px;
+      }
+
+      .recipe-subtitle {
+        font-size: 12px;
+      }
+
+      .recipe-tag {
+        padding: 4px 8px;
+        font-size: 10px;
+      }
+
+      .popup-indicator {
+        width: 50px;
+        height: 50px;
+      }
+
+      .indicator-dot {
+        width: 10px;
+        height: 10px;
+      }
+    }
+
   </style>
 </head>
 <body>
@@ -872,6 +1504,123 @@
       <div class="popup-actions">
         <button class="close-popup" onclick="closeNutritionPopup()">닫기</button>
         <button class="close-popup primary" onclick="goToRecipeSearch()">레시피 탐색</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Recipe Popup for Microwave -->
+  <div id="microwavePopup" class="recipe-popup" style="display:none">
+    <!-- Circular Indicator -->
+    <div class="popup-indicator">
+      <div class="indicator-ring"></div>
+      <div class="indicator-dot"></div>
+    </div>
+
+    <div class="recipe-card">
+      <img src="/images/recipe-example.jpg" alt="Recipe" class="recipe-image" />
+      <div class="recipe-content">
+        <h3 class="recipe-title">냉장고</h3>
+        <div class="recipe-subtitle">142개의 레시피 ›</div>
+        <div class="recipe-tags">
+          <span class="recipe-tag">냉털 레시피</span>
+          <span class="recipe-tag">홈 카페</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Recipe Popup for Fridge -->
+  <div id="fridgePopup" class="recipe-popup" style="display:none">
+    <!-- Circular Indicator -->
+    <div class="popup-indicator">
+      <div class="indicator-ring"></div>
+      <div class="indicator-dot"></div>
+    </div>
+
+    <div class="recipe-card">
+      <img src="/images/recipe-example.jpg" alt="Recipe" class="recipe-image" />
+      <div class="recipe-content">
+        <h3 class="recipe-title">전자레인지</h3>
+        <div class="recipe-subtitle">67개의 레시피 ›</div>
+        <div class="recipe-tags">
+          <span class="recipe-tag">5분 완성</span>
+          <span class="recipe-tag">노오븐 베이킹</span>
+          <span class="recipe-tag">다이어트</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Recipe Carousel for 3D Recipe Mode -->
+  <div id="recipe-carousel-overlay" class="recipe-carousel-overlay">
+    <button class="carousel-close-btn" onclick="closeRecipeCarousel()">×</button>
+
+    <div class="recipe-carousel-container">
+      <div class="carousel-navigation">
+        <button class="carousel-nav-btn" onclick="previousRecipe()">‹</button>
+        <button class="carousel-nav-btn" onclick="nextRecipe()">›</button>
+      </div>
+
+      <div class="recipe-carousel-track" id="carousel-track">
+        <!-- Recipe Card 1 -->
+        <div class="recipe-carousel-card center" data-index="0">
+          <img src="/images/recipe-example.jpg" alt="Recipe" class="recipe-card-image" />
+          <div class="recipe-card-info">
+            <div>
+              <h3 class="recipe-card-title">토마토 스파게티</h3>
+              <p class="recipe-card-description">"I look at the stars and with all my being feel that I am a part of one of these stars."</p>
+            </div>
+            <div class="recipe-card-meta">Medium: Oil on canvas • Dimensions: 29×36 1/4 in.</div>
+          </div>
+        </div>
+
+        <!-- Recipe Card 2 -->
+        <div class="recipe-carousel-card right" data-index="1">
+          <img src="/images/recipe-example.jpg" alt="Recipe" class="recipe-card-image" />
+          <div class="recipe-card-info">
+            <div>
+              <h3 class="recipe-card-title">김치찌개</h3>
+              <p class="recipe-card-description">"Taste the authentic Korean flavor with this hearty kimchi stew."</p>
+            </div>
+            <div class="recipe-card-meta">Cooking time: 30 min • Difficulty: Easy</div>
+          </div>
+        </div>
+
+        <!-- Recipe Card 3 -->
+        <div class="recipe-carousel-card hidden" data-index="2">
+          <img src="/images/recipe-example.jpg" alt="Recipe" class="recipe-card-image" />
+          <div class="recipe-card-info">
+            <div>
+              <h3 class="recipe-card-title">불고기</h3>
+              <p class="recipe-card-description">"Sweet and savory Korean BBQ beef that melts in your mouth."</p>
+            </div>
+            <div class="recipe-card-meta">Cooking time: 25 min • Difficulty: Medium</div>
+          </div>
+        </div>
+
+        <!-- Recipe Card 4 -->
+        <div class="recipe-carousel-card hidden" data-index="3">
+          <img src="/images/recipe-example.jpg" alt="Recipe" class="recipe-card-image" />
+          <div class="recipe-card-info">
+            <div>
+              <h3 class="recipe-card-title">된장찌개</h3>
+              <p class="recipe-card-description">"Traditional Korean soybean paste stew with vegetables."</p>
+            </div>
+            <div class="recipe-card-meta">Cooking time: 20 min • Difficulty: Easy</div>
+          </div>
+        </div>
+
+        <!-- Recipe Card 5 -->
+        <div class="recipe-carousel-card left" data-index="4">
+          <img src="/images/recipe-example.jpg" alt="Recipe" class="recipe-card-image" />
+          <div class="recipe-card-info">
+            <div>
+              <h3 class="recipe-card-title">비빔밥</h3>
+              <p class="recipe-card-description">"Colorful mixed rice bowl with vegetables and gochujang sauce."</p>
+            </div>
+            <div class="recipe-card-meta">Cooking time: 15 min • Difficulty: Easy</div>
+          </div>
+        </div>
       </div>
     </div>
   </div>
