@@ -1,0 +1,309 @@
+/* 3D Recipe Carousel Component Styles */
+
+.recipe-carousel-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.recipe-carousel-overlay.active {
+  display: flex;
+  opacity: 1;
+}
+
+.recipe-carousel-container {
+  width: 100%;
+  max-width: 1200px;
+  height: 70vh;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  perspective: 1500px;
+}
+
+.recipe-carousel-track {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.recipe-carousel-card {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  margin-left: -250px; /* width의 절반 */
+  margin-top: -300px;  /* height의 절반 */
+  width: 500px;
+  height: 600px;
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-radius: 24px;
+  overflow: hidden;
+  cursor: pointer;
+  transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+  transform-style: preserve-3d;
+}
+
+.recipe-carousel-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 24px;
+  padding: 1px;
+  background: linear-gradient(135deg,
+    rgba(255, 255, 255, 0.4) 0%,
+    rgba(255, 255, 255, 0.1) 50%,
+    rgba(255, 255, 255, 0.4) 100%);
+  -webkit-mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+}
+
+/* Card positions - JavaScript에서 inline style로 제어 */
+.recipe-carousel-card.center {
+  box-shadow:
+    0 40px 120px rgba(0, 0, 0, 0.4),
+    0 0 0 1px rgba(255, 255, 255, 0.2) inset,
+    0 0 80px rgba(255, 255, 255, 0.05) inset;
+  animation: fadeIn 0.6s ease-out;
+}
+
+.recipe-carousel-card.left,
+.recipe-carousel-card.right {
+  filter: brightness(0.7);
+}
+
+.recipe-carousel-card.far-left,
+.recipe-carousel-card.far-right {
+  filter: brightness(0.5);
+}
+
+.recipe-carousel-card.hidden {
+  pointer-events: none;
+}
+
+/* Hover effect */
+.recipe-carousel-card:hover .recipe-card-image {
+  transform: scale(1.05);
+}
+
+/* Fade in animation */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Card content */
+.recipe-card-image {
+  width: 100%;
+  height: 65%;
+  object-fit: cover;
+  transition: transform 0.6s ease;
+}
+
+.recipe-card-info {
+  padding: 24px;
+  height: 35%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.recipe-card-title {
+  font-size: 28px;
+  font-weight: 600;
+  color: #fff;
+  margin-bottom: 8px;
+}
+
+.recipe-card-description {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.7);
+  margin-bottom: 12px;
+  line-height: 1.4;
+}
+
+.recipe-card-meta {
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+/* Navigation */
+.carousel-navigation {
+  position: absolute;
+  width: 100%;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  justify-content: space-between;
+  padding: 0 40px;
+  pointer-events: none;
+  z-index: 10;
+}
+
+.carousel-nav-btn {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: none;
+  color: #fff;
+  font-size: 24px;
+  cursor: pointer;
+  pointer-events: auto;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.carousel-nav-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: scale(1.1);
+}
+
+.carousel-close-btn {
+  position: absolute;
+  top: 30px;
+  right: 30px;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: none;
+  color: #fff;
+  font-size: 24px;
+  cursor: pointer;
+  z-index: 20;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.carousel-close-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: scale(1.1);
+}
+
+/* Responsive styles */
+@media (max-width: 768px) {
+  .recipe-carousel-container {
+    height: 60vh;
+  }
+
+  .recipe-carousel-card {
+    width: 350px;
+    height: 500px;
+    margin-left: -175px; /* width의 절반 */
+    margin-top: -250px;  /* height의 절반 */
+  }
+
+  .recipe-card-title {
+    font-size: 24px;
+  }
+
+  .recipe-card-description {
+    font-size: 13px;
+  }
+
+  .carousel-navigation {
+    padding: 0 20px;
+  }
+
+  .carousel-nav-btn {
+    width: 40px;
+    height: 40px;
+    font-size: 20px;
+  }
+
+  .carousel-close-btn {
+    top: 20px;
+    right: 20px;
+    width: 40px;
+    height: 40px;
+    font-size: 20px;
+  }
+}
+
+@media (max-width: 480px) {
+  .recipe-carousel-container {
+    height: 55vh;
+  }
+
+  .recipe-carousel-card {
+    width: 280px;
+    height: 420px;
+    margin-left: -140px; /* width의 절반 */
+    margin-top: -210px;  /* height의 절반 */
+  }
+
+  .recipe-card-title {
+    font-size: 20px;
+  }
+
+  .recipe-card-description {
+    font-size: 12px;
+  }
+
+  .recipe-card-meta {
+    font-size: 11px;
+  }
+
+  .recipe-card-image {
+    height: 60%;
+  }
+
+  .recipe-card-info {
+    height: 40%;
+    padding: 16px;
+  }
+
+  .carousel-navigation {
+    padding: 0 10px;
+  }
+
+  .carousel-nav-btn {
+    width: 36px;
+    height: 36px;
+    font-size: 18px;
+  }
+
+  .carousel-close-btn {
+    top: 15px;
+    right: 15px;
+    width: 36px;
+    height: 36px;
+    font-size: 18px;
+  }
+}

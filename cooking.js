@@ -1,8 +1,40 @@
+// Import components
+import { VideoContainer } from './components/VideoContainer.js';
+import { RecipePopupManager, RecipePopup } from './components/RecipePopup.js';
+import { RecipeCarousel } from './components/RecipeCarousel.js';
+
 console.log('Cooking mode loaded');
 
-// TODO: attach real cooking mode logic here (recipe steps, timers, etc.)
+// 컴포넌트 인스턴스
+let videoContainer;
+let recipePopupManager;
+let recipeCarousel;
 
 document.addEventListener('DOMContentLoaded', () => {
+  // ========== 컴포넌트 초기화 ==========
+  // 비디오 컨테이너
+  videoContainer = new VideoContainer('animation-container', () => {
+    console.log('Explore video ended - showing recipe popups');
+    recipePopupManager.show('microwavePopup');
+    recipePopupManager.show('fridgePopup');
+  });
+
+  // 레시피 팝업 매니저
+  recipePopupManager = new RecipePopupManager();
+  recipePopupManager.register('microwavePopup', new RecipePopup('microwavePopup'));
+  recipePopupManager.register('fridgePopup', new RecipePopup('fridgePopup'));
+
+  // 레시피 캐러셀 (개선된 3D 효과)
+  recipeCarousel = new RecipeCarousel('recipe-carousel-overlay', {
+    totalRecipes: 5,
+    onCardClick: (cardData, cardElement) => {
+      console.log('Recipe card clicked:', cardData);
+      recipeCarousel.hide();
+      document.getElementById('3d-receipt-popup').style.display = 'flex';
+    }
+  });
+
+  // ========== 기존 코드 ==========
   const tabs = document.querySelectorAll('.bottom-bar-item');
   let measureAnimation = null;
   
@@ -112,96 +144,22 @@ document.addEventListener('DOMContentLoaded', () => {
   document.head.appendChild(style);
 
   // explore 영상 재생 함수
-  function playExploreVideo() {
-    // 성능 측정 시작
-    const loadStartTime = performance.now();
-    
+  window.playExploreVideo = function() {
+    console.log('Playing explore video using VideoContainer component');
+
     // Lottie 라이브러리가 로드되었는지 확인
     if (typeof lottie === 'undefined') {
       console.error('Lottie library is not loaded');
       return;
     }
-    
+
     if (measureAnimation) {
       measureAnimation.destroy();
     }
-    
-    // 모든 콘텐츠를 즉시 숨김
-    const allContents = document.querySelectorAll('.tab-content');
-    allContents.forEach(content => {
-      content.style.display = 'none';
-    });
-    
-    // 애니메이션 컨테이너를 미리 준비하여 빠른 로딩
-    animationContainer.innerHTML = '';
-    animationContainer.classList.remove('visible');
-            
-    console.log('Auto-playing explore video on page load');
-    
-    // 애니메이션 컨테이너 초기화
-    animationContainer.innerHTML = '';
-    
-    console.log('Loading video from path: /videos/explore.mp4');
-    
-    // MP4 비디오 요소 생성
-    const videoElement = document.createElement('video');
-    videoElement.src = '/videos/explore.mp4';
-    videoElement.autoplay = true;
-    videoElement.loop = false; // 반복재생 하지 않음
-    videoElement.muted = true;
-    videoElement.playsInline = true;
-    // 모바일에서 스케일 조정
-    const isMobile = window.innerWidth <= 768;
-    const scale = isMobile ? (window.innerWidth <= 480 ? '1.0' : '1.1') : '1.2';
-    
-    videoElement.style.cssText = `
-      width: 100vw !important;
-      height: 100vh !important;
-      object-fit: cover;
-      transform: scale(${scale});
-      transform-origin: center;
-    `;
-    
-    animationContainer.appendChild(videoElement);
-    
-    videoElement.addEventListener('loadeddata', () => {
-      const loadEndTime = performance.now();
-      const loadTime = loadEndTime - loadStartTime;
-      console.log(`Explore video loaded successfully in ${loadTime.toFixed(2)}ms`);
-      console.log(`Video size: ${videoElement.videoWidth}x${videoElement.videoHeight}`);
-      
-      videoElement.play();
-      
-      // 비디오가 로드된 후 즉시 컨테이너 표시
-      animationContainer.classList.add('visible');
-      console.log('Explore video container faded in');
-    });
-    
-    videoElement.addEventListener('ended', () => {
-      console.log('Explore video ended - showing recipe popups');
-      // 영상을 마지막 프레임에서 멈춤
-      videoElement.pause();
 
-      // 전자레인지 팝업 표시
-      const microwavePopup = document.getElementById('microwavePopup');
-      if (microwavePopup) {
-        microwavePopup.style.display = 'flex';
-      }
-
-      // 냉장고 팝업 표시
-      const fridgePopup = document.getElementById('fridgePopup');
-      if (fridgePopup) {
-        fridgePopup.style.display = 'flex';
-      }
-    });
-    
-    videoElement.addEventListener('error', (e) => {
-      const loadEndTime = performance.now();
-      const loadTime = loadEndTime - loadStartTime;
-      console.error(`Error loading explore video after ${loadTime.toFixed(2)}ms:`, e);
-      console.error('Failed video path: /videos/explore.mp4');
-    });
-  }
+    // VideoContainer 컴포넌트를 사용하여 비디오 재생
+    videoContainer.play('/videos/explore.mp4');
+  };
 
   tabs.forEach(tab => {
     tab.addEventListener('click', (e) => {
@@ -221,35 +179,19 @@ document.addEventListener('DOMContentLoaded', () => {
       // 버튼별로 다른 처리
       const buttonAlt = tab.querySelector('img').alt;
       console.log('Button clicked:', buttonAlt);
-      
-      
-      // 성능 측정 시작
-      const loadStartTime = performance.now();
-      
-      // Lottie 라이브러리가 로드되었는지 확인
-      if (typeof lottie === 'undefined') {
-        console.error('Lottie library is not loaded');
-        return;
-      }
-      
+
       if (measureAnimation) {
         measureAnimation.destroy();
       }
-      
+
       // 모든 콘텐츠를 즉시 숨김
       const allContents = document.querySelectorAll('.tab-content');
       allContents.forEach(content => {
         content.style.display = 'none';
       });
-      
-      // 애니메이션 컨테이너는 아직 보이지 않게 유지
-      console.log('Preparing video container');
-      
-      // 애니메이션 컨테이너 초기화
-      animationContainer.innerHTML = '';
-      
+
       // 버튼에 따라 다른 영상 선택
-      let videoPath = '/videos/explore.mp4'; // 기본값
+      let videoPath = '/videos/explore.mp4'; // 기본값 (Scan)
       if (buttonAlt === '3D Receipt') {
         videoPath = '/videos/3D.mp4';
       } else if (buttonAlt === 'Measure') {
@@ -259,75 +201,42 @@ document.addEventListener('DOMContentLoaded', () => {
       } else if (buttonAlt === 'Zoom') {
         videoPath = '/videos/zoom.mp4';
       }
-      
-      console.log('Loading video from path:', videoPath);
-      
-      // MP4 비디오 요소 생성
-      const videoElement = document.createElement('video');
-      videoElement.src = videoPath;
-      // Zoom 버튼은 자동재생 안함, 나머지는 자동재생
-      videoElement.autoplay = (buttonAlt !== 'Zoom');
-      videoElement.loop = false;
-      videoElement.muted = true;
-      videoElement.playsInline = true;
-      // 모바일에서 스케일 조정
-      const isMobile = window.innerWidth <= 768;
-      const scale = isMobile ? (window.innerWidth <= 480 ? '1.0' : '1.1') : '1.4';
-      
-      videoElement.style.cssText = `
-        width: 100vw !important;
-        height: 100vh !important;
-        object-fit: cover;
-        transform: scale(${scale});
-        transform-origin: center;
-      `;
-      
-      animationContainer.appendChild(videoElement);
-      
-      videoElement.addEventListener('loadeddata', () => {
-        const loadEndTime = performance.now();
-        const loadTime = loadEndTime - loadStartTime;
-        console.log(`${buttonAlt} video loaded successfully in ${loadTime.toFixed(2)}ms`);
-        console.log(`Video size: ${videoElement.videoWidth}x${videoElement.videoHeight}`);
-        console.log(`Video path: ${videoPath}`);
 
-        // Zoom 버튼은 자동 재생하지 않고 컨트롤 UI 즉시 표시
-        if (buttonAlt === 'Zoom') {
-          // 비디오가 로드된 후 즉시 컨테이너 표시
-          animationContainer.classList.add('visible');
-          console.log('Video container faded in');
-          // 컨트롤 UI 표시
-          showZoomControl(videoElement);
-        } else {
-          // 다른 버튼들은 기존대로 자동 재생
-          videoElement.play();
-          // 비디오가 로드된 후 즉시 컨테이너 표시
-          animationContainer.classList.add('visible');
-          console.log('Video container faded in');
-        }
-      });
+      console.log('Playing video using VideoContainer:', videoPath);
 
-      videoElement.addEventListener('ended', () => {
+      // Zoom 버튼은 자동재생 안함
+      const autoplay = buttonAlt !== 'Zoom';
+
+      // VideoContainer 컴포넌트를 사용하여 비디오 재생
+      videoContainer.play(videoPath, () => {
         console.log(`${buttonAlt} video ended`);
 
-        if (buttonAlt === 'Scan') {
-          // Scan (탐색하기): 영상 멈춤 (이미지 오버레이 표시 안함)
-          videoElement.pause();
-          // showScanImageView() 호출 제거
-        } else if (buttonAlt === 'Zoom') {
-          // Zoom (확대하기): 아무것도 안함 (컨트롤 UI가 이미 표시됨)
-        } else {
-          // 3D Recipe, Measure, Record: 각각의 팝업 표시
+        // 3D Receipt 버튼인 경우 레시피 캐러셀 표시
+        if (buttonAlt === '3D Receipt') {
+          window.showRecipeCarousel();
+        }
+
+        // Measure 버튼인 경우 팝업 표시
+        if (buttonAlt === 'Measure') {
           showTabPopup(buttonAlt);
         }
-      });
-      
-      videoElement.addEventListener('error', (e) => {
-        const loadEndTime = performance.now();
-        const loadTime = loadEndTime - loadStartTime;
-        console.error(`Error loading ${buttonAlt} video after ${loadTime.toFixed(2)}ms:`, e);
-        console.error(`Failed video path: ${videoPath}`);
-      });
+
+        // Record 버튼인 경우 팝업 표시
+        if (buttonAlt === 'Record') {
+          showTabPopup(buttonAlt);
+        }
+      }, { autoplay });
+
+      // Zoom 버튼인 경우 비디오 로드 후 줌 컨트롤 표시
+      if (buttonAlt === 'Zoom') {
+        // VideoContainer의 비디오 엘리먼트에 접근하기 위해 약간의 지연
+        setTimeout(() => {
+          const videoElement = videoContainer.videoElement;
+          if (videoElement) {
+            window.showZoomControl(videoElement);
+          }
+        }, 100);
+      }
     });
   });
 
@@ -568,10 +477,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const zoomSliderFill = document.getElementById('zoom-slider-fill');
     const zoomSliderThumb = document.getElementById('zoom-slider-thumb');
     const zoomValue = document.getElementById('zoom-value');
+    const zoomPlayPauseBtn = document.getElementById('zoom-play-pause');
 
     let currentProgress = 0; // 0% ~ 100%
     let isDraggingSlider = false;
     let currentVideoElement = null;
+    let isPlaying = false;
 
     // 줌 진행도 업데이트 함수 (영상 시간을 조절)
     function updateZoomProgress(progress) {
@@ -590,6 +501,23 @@ document.addEventListener('DOMContentLoaded', () => {
         currentVideoElement.currentTime = targetTime;
       }
     }
+
+    // 재생/일시정지 버튼
+    zoomPlayPauseBtn.addEventListener('click', () => {
+      if (!currentVideoElement) return;
+
+      if (isPlaying) {
+        currentVideoElement.pause();
+        zoomPlayPauseBtn.textContent = '▶';
+        isPlaying = false;
+        console.log('Video paused');
+      } else {
+        currentVideoElement.play();
+        zoomPlayPauseBtn.textContent = '❚❚';
+        isPlaying = true;
+        console.log('Video playing');
+      }
+    });
 
     // 확대 버튼 (진행도 10% 증가)
     zoomInBtn.addEventListener('click', () => {
@@ -708,69 +636,68 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // ========== Recipe Carousel Functions ==========
-  let currentRecipeIndex = 0;
-  const totalRecipes = 5;
-
+  // ========== Recipe Carousel Functions (Using Component) ==========
   window.showRecipeCarousel = function() {
-    const overlay = document.getElementById('recipe-carousel-overlay');
-    overlay.classList.add('active');
-    updateCarouselCards();
+    console.log('Showing recipe carousel using RecipeCarousel component');
+    recipeCarousel.show();
   };
 
   window.closeRecipeCarousel = function() {
-    const overlay = document.getElementById('recipe-carousel-overlay');
-    overlay.classList.remove('active');
+    console.log('Closing recipe carousel');
+    recipeCarousel.hide();
   };
 
   window.nextRecipe = function() {
-    currentRecipeIndex = (currentRecipeIndex + 1) % totalRecipes;
-    updateCarouselCards();
+    recipeCarousel.next();
+    console.log('Next recipe:', recipeCarousel.getCurrentIndex());
   };
 
   window.previousRecipe = function() {
-    currentRecipeIndex = (currentRecipeIndex - 1 + totalRecipes) % totalRecipes;
-    updateCarouselCards();
+    recipeCarousel.previous();
+    console.log('Previous recipe:', recipeCarousel.getCurrentIndex());
   };
 
-  function updateCarouselCards() {
-    const cards = document.querySelectorAll('.recipe-carousel-card');
+  // ========== Measure Tag 관련 함수 ==========
+  window.showNutritionFromTag = function() {
+    console.log('Showing nutrition from tag');
+    const nutritionPopup = document.getElementById('nutrition-popup');
+    if (nutritionPopup) {
+      nutritionPopup.style.display = 'flex';
+    }
+  };
 
-    cards.forEach((card) => {
-      const cardIndex = parseInt(card.getAttribute('data-index'));
+  window.closeNutritionPopup = function() {
+    console.log('Closing nutrition popup');
+    const nutritionPopup = document.getElementById('nutrition-popup');
+    if (nutritionPopup) {
+      nutritionPopup.style.display = 'none';
+    }
+  };
 
-      // 현재 인덱스를 기준으로 상대적 위치 계산
-      let relativePosition = (cardIndex - currentRecipeIndex + totalRecipes) % totalRecipes;
+  window.goToRecipeSearch = function() {
+    console.log('Going to recipe search');
+    window.closeNutritionPopup();
+    window.showRecipeCarousel();
+  };
 
-      // 클래스 초기화
-      card.classList.remove('center', 'left', 'right', 'hidden');
+  // ========== Record 관련 함수 ==========
+  window.saveRecord = function() {
+    console.log('Saving record');
+    const recordPopup = document.getElementById('record-popup');
+    const successPopup = document.getElementById('save-success-popup');
 
-      // 위치에 따라 클래스 추가
-      if (relativePosition === 0) {
-        card.classList.add('center');
-      } else if (relativePosition === 1) {
-        card.classList.add('right');
-      } else if (relativePosition === totalRecipes - 1) {
-        card.classList.add('left');
-      } else {
-        card.classList.add('hidden');
-      }
-    });
-  }
+    if (recordPopup) {
+      recordPopup.style.display = 'none';
+    }
 
-  // 카드 클릭 시 중앙으로 이동
-  document.querySelectorAll('.recipe-carousel-card').forEach((card) => {
-    card.addEventListener('click', function() {
-      if (!this.classList.contains('center')) {
-        const cardIndex = parseInt(this.getAttribute('data-index'));
-        currentRecipeIndex = cardIndex;
-        updateCarouselCards();
-      } else {
-        // 중앙 카드 클릭 시 레시피 상세 보기 (기존 팝업 활용)
-        closeRecipeCarousel();
-        document.getElementById('3d-receipt-popup').style.display = 'flex';
-      }
-    });
-  });
+    if (successPopup) {
+      successPopup.style.display = 'flex';
+
+      // 2초 후 자동으로 닫기
+      setTimeout(() => {
+        successPopup.style.display = 'none';
+      }, 2000);
+    }
+  };
 
 });

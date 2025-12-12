@@ -1,0 +1,30 @@
+/* Cooking Mode - Base Styles */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  touch-action: pan-y;
+}
+
+html {
+  touch-action: manipulation;
+}
+
+body {
+  font-family: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, system-ui, Roboto, "Helvetica Neue", "Segoe UI", "Apple SD Gothic Neo", "Noto Sans KR", "Malgun Gothic", "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", sans-serif;
+  background: #0f1115;
+  color: #fff;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  touch-action: pan-y;
+  overflow-x: hidden;
+}
+
+/* SVG Filter for Liquid Glass Effect */
+.liquid-glass-filter {
+  position: absolute;
+  width: 0;
+  height: 0;
+  pointer-events: none;
+}
