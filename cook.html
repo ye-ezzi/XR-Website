@@ -538,14 +538,42 @@
       transform: translateX(-50%);
       display: none;
       align-items: center;
-      gap: 15px;
-      padding: 20px 30px;
-      background: rgba(26, 26, 26, 0.85);
-      backdrop-filter: blur(12px);
-      border-radius: 50px;
-      border: 1px solid rgba(255, 255, 255, 0.2);
+      gap: 12px;
+      padding: 14px 18px;
+      background: rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(4px) saturate(190%) contrast(110%);
+      -webkit-backdrop-filter: blur(32px) saturate(10%) contrast(10%);
+      filter: drop-shadow(0 0 2px rgba(255, 255, 255, 0.02));
+      border-radius: 999px;
       z-index: 1500;
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+      box-shadow:
+        0 12px 40px rgba(0, 0, 0, 0.35),
+        inset 0 1px 0 rgba(255,255,255,0.2);
+      position: relative;
+      overflow: hidden;
+      width: fit-content;
+      max-width: calc(100% - 32px);
+    }
+
+    .zoom-control::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      padding: 1.1px;
+      background: linear-gradient(135deg,
+        rgba(255,255,255,0.65),
+        rgba(255, 255, 255, 0.064),
+        rgba(255,255,255,0.65));
+      -webkit-mask:
+        linear-gradient(#fff 0 0) content-box,
+        linear-gradient(#fff 0 0);
+      mask:
+        linear-gradient(#fff 0 0) content-box,
+        linear-gradient(#fff 0 0);
+      -webkit-mask-composite: xor;
+      mask-composite: exclude;
+      pointer-events: none;
     }
 
     .zoom-control.active {
@@ -553,24 +581,27 @@
     }
 
     .zoom-btn {
-      width: 44px;
-      height: 44px;
-      border-radius: 50%;
-      background: rgba(255, 255, 255, 0.1);
-      border: 1px solid rgba(255, 255, 255, 0.25);
+      width: 42px;
+      height: 42px;
+      border-radius: 40px;
+      background: linear-gradient(145deg, rgba(255,255,255,0.22), rgba(255,255,255,0.08));
+      border: 1px solid rgba(255, 255, 255, 0.35);
       color: #fff;
-      font-size: 24px;
+      font-size: 20px;
       display: flex;
       align-items: center;
       justify-content: center;
       cursor: pointer;
       transition: all 0.2s ease;
       user-select: none;
+      box-shadow:
+        0 8px 24px rgba(0,0,0,0.25);
     }
 
     .zoom-btn:hover {
-      background: rgba(255, 255, 255, 0.2);
-      border-color: rgba(244, 207, 21, 0.8);
+      background: rgba(255, 255, 255, 0.28);
+      border-color: rgba(255, 255, 255, 0.6);
+      transform: translateY(-1px);
     }
 
     .zoom-btn:active {
@@ -578,20 +609,22 @@
     }
 
     .zoom-slider {
-      width: 200px;
-      height: 6px;
-      border-radius: 3px;
-      background: rgba(255, 255, 255, 0.2);
+      width: clamp(120px, 22vw, 170px);
+      height: 8px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.18);
       position: relative;
       cursor: pointer;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.25);
     }
 
     .zoom-slider-fill {
       height: 100%;
-      background: linear-gradient(90deg, #F4CF15, #FFD700);
-      border-radius: 3px;
+      background: linear-gradient(90deg, #f49f15, #ff8000);
+      border-radius: 999px;
       width: 0%;
       transition: width 0.1s ease;
+      box-shadow: 0 0 12px rgba(244, 207, 21, 0.4);
     }
 
     .zoom-slider-thumb {
@@ -599,14 +632,16 @@
       top: 50%;
       left: 0%;
       transform: translate(-50%, -50%);
-      width: 20px;
-      height: 20px;
+      width: 18px;
+      height: 18px;
       border-radius: 50%;
-      background: #F4CF15;
-      border: 2px solid #fff;
+      background: rgba(255,255,255,0.9);
+      border: 2px solid rgba(255,255,255,0.65);
       cursor: grab;
-      transition: left 0.1s ease;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+      transition: left 0.1s ease, box-shadow 0.2s ease;
+      box-shadow:
+        0 3px 10px rgba(0, 0, 0, 0.3),
+        inset 0 1px 0 rgba(255,255,255,0.65);
     }
 
     .zoom-slider-thumb:active {
@@ -614,7 +649,7 @@
     }
 
     .zoom-value {
-      color: #F4CF15;
+      color: #ffffff;
       font-size: 16px;
       font-weight: 600;
       min-width: 50px;
@@ -622,44 +657,46 @@
     }
 
     /* 모바일 반응형 */
-    @media (max-width: 768px) {
-      .zoom-control {
-        bottom: 100px;
-        padding: 15px 20px;
-        gap: 10px;
-      }
-
-      .zoom-btn {
-        width: 40px;
-        height: 40px;
-        font-size: 20px;
-      }
-
-      .zoom-slider {
-        width: 150px;
-      }
-
-      .zoom-value {
-        font-size: 14px;
-        min-width: 45px;
-      }
+  @media (max-width: 768px) {
+    .zoom-control {
+      bottom: 100px;
+      padding: 12px 14px;
+      gap: 8px;
+      max-width: calc(100% - 24px);
     }
 
-    @media (max-width: 480px) {
-      .zoom-control {
-        bottom: 90px;
-        padding: 12px 16px;
-        gap: 8px;
-      }
+    .zoom-btn {
+      width: 38px;
+      height: 38px;
+      font-size: 18px;
+    }
 
-      .zoom-btn {
-        width: 36px;
-        height: 36px;
-        font-size: 18px;
-      }
+    .zoom-slider {
+      width: clamp(110px, 30vw, 150px);
+    }
+
+    .zoom-value {
+      font-size: 14px;
+      min-width: 45px;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .zoom-control {
+      bottom: 90px;
+      padding: 11px 12px;
+      gap: 6px;
+      max-width: calc(100% - 18px);
+    }
+
+    .zoom-btn {
+      width: 34px;
+      height: 34px;
+      font-size: 17px;
+    }
 
       .zoom-slider {
-        width: 120px;
+        width: clamp(100px, 36vw, 130px);
       }
 
       .zoom-value {
@@ -959,51 +996,6 @@
     <img id="scan-image" src="/images/Screen.png" alt="Scan View" />
   </div>
 
-  <div id="3d-receipt-popup" class="tab-popup" style="display: none;">
-    <div class="popup-content recipe-popup" style="max-height: 80vh; overflow-y: auto; cursor: move; position: relative; max-width: 416px; padding: 16px;">
-      <button class="popup-close-btn" onclick="document.getElementById('3d-receipt-popup').style.display='none'" style="top: 12px; right: 12px; width: 26px; height: 26px; font-size: 18px;">×</button>
-      <h3 style="font-size: 16px; margin-bottom: 12px;">🍝 토마토 스파게티 레시피</h3>
-
-      <div style="text-align: left; margin: 16px 0;">
-        <h4 style="color: #F4CF15; margin-bottom: 8px; font-size: 13px;">재료 (2인분)</h4>
-        <ul style="list-style: none; padding-left: 0; opacity: 0.9; font-size: 11px; line-height: 1.6;">
-          <li>• 스파게티 면 200g</li>
-          <li>• 토마토 소스 400ml</li>
-          <li>• 마늘 3쪽</li>
-          <li>• 올리브유 2큰술</li>
-          <li>• 양파 1/2개</li>
-          <li>• 바질 약간</li>
-          <li>• 소금, 후추 약간</li>
-          <li>• 파마산 치즈 (선택)</li>
-        </ul>
-      </div>
-
-      <div style="text-align: left; margin: 16px 0;">
-        <h4 style="color: #F4CF15; margin-bottom: 8px; font-size: 13px;">조리 순서</h4>
-        <ol style="padding-left: 16px; opacity: 0.9; line-height: 1.6; font-size: 11px;">
-          <li>큰 냄비에 물을 끓이고 소금을 넣은 후 스파게티 면을 8-10분간 삶습니다.</li>
-          <li>마늘과 양파를 잘게 다집니다.</li>
-          <li>팬에 올리브유를 두르고 마늘과 양파를 볶습니다.</li>
-          <li>토마토 소스를 넣고 중불에서 5분간 끓입니다.</li>
-          <li>삶은 스파게티 면을 소스에 넣고 잘 섞습니다.</li>
-          <li>소금, 후추로 간을 맞추고 바질을 올립니다.</li>
-          <li>접시에 담고 파마산 치즈를 뿌려 완성합니다.</li>
-        </ol>
-      </div>
-
-      <div style="text-align: left; margin: 16px 0; padding: 12px; background: rgba(244, 207, 21, 0.1); border-radius: 6px;">
-        <h4 style="color: #F4CF15; margin-bottom: 6px; font-size: 12px;">💡 팁</h4>
-        <p style="opacity: 0.9; margin: 0; font-size: 11px; line-height: 1.5;">
-          면을 삶을 때 물에 소금을 충분히 넣으면 더 맛있습니다.
-          면수를 조금 남겨두었다가 소스에 추가하면 더 부드러운 맛을 낼 수 있습니다.
-        </p>
-      </div>
-
-      <div class="popup-actions" style="margin-top: 16px;">
-        <button class="close-popup primary" style="padding: 8px 12px; font-size: 12px;">확인</button>
-      </div>
-    </div>
-  </div>
 
   <!-- 측정하기 태그 오버레이 -->
   <div id="measure-overlay" class="measure-overlay">
@@ -1016,16 +1008,15 @@
   </div>
 
   <!-- 확대하기 컨트롤 UI -->
-  <div id="zoom-control" class="zoom-control">
-    <div class="zoom-btn" id="zoom-play-pause">▶</div>
-    <div class="zoom-btn" id="zoom-out">−</div>
-    <div class="zoom-slider" id="zoom-slider">
-      <div class="zoom-slider-fill" id="zoom-slider-fill"></div>
-      <div class="zoom-slider-thumb" id="zoom-slider-thumb"></div>
+    <div id="zoom-control" class="zoom-control">
+      <div class="zoom-btn" id="zoom-out">−</div>
+      <div class="zoom-slider" id="zoom-slider">
+        <div class="zoom-slider-fill" id="zoom-slider-fill"></div>
+        <div class="zoom-slider-thumb" id="zoom-slider-thumb"></div>
+      </div>
+      <div class="zoom-btn" id="zoom-in">+</div>
+      <div class="zoom-value" id="zoom-value">1.0x</div>
     </div>
-    <div class="zoom-btn" id="zoom-in">+</div>
-    <div class="zoom-value" id="zoom-value">1.0x</div>
-  </div>
 
   <div id="measure-popup" class="tab-popup" style="display: none;">
     <div class="popup-content">
@@ -1166,17 +1157,11 @@
 
   <!-- Recipe Carousel for 3D Recipe Mode -->
   <div id="recipe-carousel-overlay" class="recipe-carousel-overlay">
-    <button class="carousel-close-btn" onclick="closeRecipeCarousel()">×</button>
-
     <div class="recipe-carousel-container">
-      <div class="carousel-navigation">
-        <button class="carousel-nav-btn" onclick="previousRecipe()">‹</button>
-        <button class="carousel-nav-btn" onclick="nextRecipe()">›</button>
-      </div>
-
       <div class="recipe-carousel-track" id="carousel-track">
         <!-- Recipe Card 1 -->
         <div class="recipe-carousel-card center" data-index="0">
+          <button class="card-close-btn" onclick="closeRecipeCarousel()" aria-label="레시피 캐러셀 닫기">×</button>
           <img src="/images/recipe-example.jpg" alt="Recipe" class="recipe-card-image" />
           <div class="recipe-card-info">
             <div>
@@ -1189,6 +1174,7 @@
 
         <!-- Recipe Card 2 -->
         <div class="recipe-carousel-card right" data-index="1">
+          <button class="card-close-btn" onclick="closeRecipeCarousel()" aria-label="레시피 캐러셀 닫기">×</button>
           <img src="/images/recipe-example.jpg" alt="Recipe" class="recipe-card-image" />
           <div class="recipe-card-info">
             <div>
@@ -1201,6 +1187,7 @@
 
         <!-- Recipe Card 3 -->
         <div class="recipe-carousel-card hidden" data-index="2">
+          <button class="card-close-btn" onclick="closeRecipeCarousel()" aria-label="레시피 캐러셀 닫기">×</button>
           <img src="/images/recipe-example.jpg" alt="Recipe" class="recipe-card-image" />
           <div class="recipe-card-info">
             <div>
@@ -1213,6 +1200,7 @@
 
         <!-- Recipe Card 4 -->
         <div class="recipe-carousel-card hidden" data-index="3">
+          <button class="card-close-btn" onclick="closeRecipeCarousel()" aria-label="레시피 캐러셀 닫기">×</button>
           <img src="/images/recipe-example.jpg" alt="Recipe" class="recipe-card-image" />
           <div class="recipe-card-info">
             <div>
@@ -1225,6 +1213,7 @@
 
         <!-- Recipe Card 5 -->
         <div class="recipe-carousel-card left" data-index="4">
+          <button class="card-close-btn" onclick="closeRecipeCarousel()" aria-label="레시피 캐러셀 닫기">×</button>
           <img src="/images/recipe-example.jpg" alt="Recipe" class="recipe-card-image" />
           <div class="recipe-card-info">
             <div>
@@ -1234,6 +1223,15 @@
             <div class="recipe-card-meta">Cooking time: 15 min • Difficulty: Easy</div>
           </div>
         </div>
+      </div>
+
+      <!-- Bottom glass controller -->
+      <div class="carousel-bottom-bar">
+        <button class="carousel-pill-btn prev" onclick="previousRecipe()" aria-label="이전 레시피"></button>
+        <div class="carousel-thumb">
+          <img src="/images/recipe-example.jpg" alt="현재 레시피 썸네일" />
+        </div>
+        <button class="carousel-pill-btn next" onclick="nextRecipe()" aria-label="다음 레시피"></button>
       </div>
     </div>
   </div>

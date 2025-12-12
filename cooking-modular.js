@@ -16,10 +16,9 @@ document.addEventListener('DOMContentLoaded', () => {
     carouselOptions: {
       totalRecipes: 5,
       onCardClick: (cardData, cardElement) => {
-        // 중앙 카드 클릭 시 레시피 상세 팝업 표시
+        // 상세 팝업 제거됨: 카드 클릭 시 로그만 남김
         console.log('Recipe card clicked:', cardData);
         recipeCarousel.hide();
-        document.getElementById('3d-receipt-popup').style.display = 'flex';
       }
     },
     onVideoEnd: () => {
@@ -69,7 +68,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // ========== 기존 기능들 (팝업, 드래그, 줌 등) ==========
   initPopupEvents();
-  initDraggablePopup();
+  // 상세 팝업 제거: 드래그 초기화 생략
   initZoomControl();
   initScanImageView();
   initTabs();

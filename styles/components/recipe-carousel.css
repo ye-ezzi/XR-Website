@@ -27,7 +27,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  perspective: 1500px;
+  perspective: 1300px; /* 3D 회전 효과를 더 체감할 수 있게 조정 */
+  transform-style: preserve-3d;
 }
 
 .recipe-carousel-track {
@@ -38,6 +39,7 @@
   align-items: center;
   justify-content: center;
   transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  transform-style: preserve-3d;
 }
 
 .recipe-carousel-card {
@@ -154,72 +156,129 @@
   color: rgba(255, 255, 255, 0.5);
 }
 
-/* Navigation */
-.carousel-navigation {
+/* Bottom controller */
+.carousel-bottom-bar {
   position: absolute;
-  width: 100%;
-  top: 50%;
-  transform: translateY(-50%);
+  bottom: -80px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(90%, 1080px);
+  height: 78px; /* 0.8x 축소 */
+  padding: 0 18px;
   display: flex;
+  align-items: center;
   justify-content: space-between;
-  padding: 0 40px;
-  pointer-events: none;
-  z-index: 10;
+  background: rgba(255, 255, 255, 0.92);
+  border-radius: 40px;
+  box-shadow:
+    0 25px 60px rgba(0, 0, 0, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.65);
+  gap: 14px;
 }
 
-.carousel-nav-btn {
-  width: 50px;
-  height: 50px;
+.carousel-thumb {
+  width: 62px;
+  height: 62px;
+  border-radius: 18px;
+  overflow: hidden;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+  flex-shrink: 0;
+}
+
+.carousel-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.carousel-pill-btn {
+  width: 54px;
+  height: 54px;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
   border: none;
-  color: #fff;
-  font-size: 24px;
+  background: linear-gradient(145deg, rgba(255,255,255,0.97), rgba(238,238,238,0.9));
+  box-shadow:
+    0 10px 30px rgba(0,0,0,0.12),
+    inset 0 1px 0 rgba(255,255,255,0.9);
   cursor: pointer;
-  pointer-events: auto;
-  transition: all 0.2s ease;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  position: relative;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
-.carousel-nav-btn:hover {
-  background: rgba(255, 255, 255, 0.2);
-  transform: scale(1.1);
-}
-
-.carousel-close-btn {
+.carousel-pill-btn::after {
+  content: '';
   position: absolute;
-  top: 30px;
-  right: 30px;
-  width: 50px;
-  height: 50px;
+  inset: 0;
+  background: radial-gradient(circle at 60% 40%, rgba(255,255,255,0.5), transparent 45%);
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+  opacity: 0.95;
+}
+
+.carousel-pill-btn.prev::before,
+.carousel-pill-btn.next::before {
+  content: '';
+  position: absolute;
+  inset: 19px;
+  border-radius: 50%;
+  box-shadow:
+    8px 0 12px rgba(0,0,0,0.08),
+    inset 0 1px 0 rgba(255,255,255,0.8);
+  transform: rotate(38deg);
+}
+
+.carousel-pill-btn.next::before {
+  transform: rotate(-36deg);
+}
+
+.carousel-pill-btn:hover {
+  transform: translateY(-2px);
+  box-shadow:
+    0 16px 40px rgba(0,0,0,0.18),
+    inset 0 1px 0 rgba(255,255,255,0.95);
+}
+
+.carousel-pill-btn:active {
+  transform: translateY(0);
+}
+
+.card-close-btn {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  width: 36px;
+  height: 36px;
+  border-radius: 12px;
   border: none;
-  color: #fff;
-  font-size: 24px;
+  background: rgba(255, 255, 255, 0.9);
+  color: #111;
+  font-size: 20px;
   cursor: pointer;
-  z-index: 20;
-  transition: all 0.2s ease;
+  box-shadow:
+    0 10px 26px rgba(0,0,0,0.16),
+    inset 0 1px 0 rgba(255,255,255,0.9);
   display: flex;
   align-items: center;
   justify-content: center;
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
 }
 
-.carousel-close-btn:hover {
-  background: rgba(255, 255, 255, 0.2);
-  transform: scale(1.1);
+.card-close-btn:hover {
+  transform: translateY(-1px);
+  box-shadow:
+    0 14px 32px rgba(0,0,0,0.2),
+    inset 0 1px 0 rgba(255,255,255,0.95);
+}
+
+.card-close-btn:active {
+  transform: translateY(0);
 }
 
 /* Responsive styles */
 @media (max-width: 768px) {
   .recipe-carousel-container {
     height: 60vh;
+    --card-half: 175px;
   }
 
   .recipe-carousel-card {
@@ -237,28 +296,12 @@
     font-size: 13px;
   }
 
-  .carousel-navigation {
-    padding: 0 20px;
-  }
-
-  .carousel-nav-btn {
-    width: 40px;
-    height: 40px;
-    font-size: 20px;
-  }
-
-  .carousel-close-btn {
-    top: 20px;
-    right: 20px;
-    width: 40px;
-    height: 40px;
-    font-size: 20px;
-  }
 }
 
 @media (max-width: 480px) {
   .recipe-carousel-container {
     height: 55vh;
+    --card-half: 140px;
   }
 
   .recipe-carousel-card {
@@ -288,22 +331,72 @@
     height: 40%;
     padding: 16px;
   }
+}
 
-  .carousel-navigation {
-    padding: 0 10px;
+/* Overrides for controller/close sizing and position */
+@media (max-width: 768px) {
+  .carousel-bottom-bar {
+    bottom: 40px;
+    height: 70px;
+    padding: 0 14px;
+    border-radius: 34px;
+    gap: 12px;
   }
 
-  .carousel-nav-btn {
-    width: 36px;
-    height: 36px;
-    font-size: 18px;
+  .carousel-thumb {
+    width: 56px;
+    height: 56px;
+    border-radius: 16px;
   }
 
-  .carousel-close-btn {
-    top: 15px;
-    right: 15px;
-    width: 36px;
-    height: 36px;
+  .carousel-pill-btn {
+    width: 48px;
+    height: 48px;
+  }
+
+  .carousel-pill-btn.prev::before,
+  .carousel-pill-btn.next::before {
+    inset: 17px;
+  }
+
+  .card-close-btn {
+    top: 14px;
+    right: 14px;
+    width: 32px;
+    height: 32px;
     font-size: 18px;
+  }
+}
+
+@media (max-width: 480px) {
+  .carousel-bottom-bar {
+    bottom: 32px;
+    height: 64px;
+    padding: 0 12px;
+    border-radius: 30px;
+  }
+
+  .carousel-thumb {
+    width: 52px;
+    height: 52px;
+    border-radius: 14px;
+  }
+
+  .carousel-pill-btn {
+    width: 44px;
+    height: 44px;
+  }
+
+  .carousel-pill-btn.prev::before,
+  .carousel-pill-btn.next::before {
+    inset: 15px;
+  }
+
+  .card-close-btn {
+    top: 12px;
+    right: 12px;
+    width: 30px;
+    height: 30px;
+    font-size: 17px;
   }
 }

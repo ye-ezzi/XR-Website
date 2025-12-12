@@ -172,18 +172,18 @@ export class RecipeCarousel {
 
       // 모바일 대응
       if (isSmallMobile) {
-        if (absPos === 1) return pos * 280; // 작은 모바일: 바로 옆 카드
-        if (absPos === 2) return pos * 380; // 작은 모바일: 바깥 카드
-        return pos * 380; // 나머지 카드
+        if (absPos === 1) return pos * 120; // 작은 모바일: 바로 옆 카드
+        if (absPos === 2) return pos * 150; // 작은 모바일: 바깥 카드 더 중앙으로
+        return pos * 200; // 나머지 카드
       } else if (isMobile) {
-        if (absPos === 1) return pos * 320; // 모바일: 바로 옆 카드
-        if (absPos === 2) return pos * 420; // 모바일: 바깥 카드
-        return pos * 420; // 나머지 카드
+        if (absPos === 1) return pos * 160; // 모바일: 바로 옆 카드
+        if (absPos === 2) return pos * 190; // 모바일: 바깥 카드 더 중앙으로
+        return pos * 240; // 나머지 카드
       }
 
       // 데스크톱 - 참고 코드와 유사한 간격
-      if (absPos === 1) return pos * 200; // 바로 옆 카드 간격 (120 * 3 비율)
-      if (absPos === 2) return pos * 210; // 바깥 카드 간격 (130 * 3 비율, 약간 넓게)
+      if (absPos === 1) return pos * 150; // 바로 옆 카드 간격
+      if (absPos === 2) return pos * 180; // 바깥 카드 간격 더 중앙으로
     };
 
     // Z축 깊이 (바로 옆 카드가 바깥 카드보다 앞에 오도록)
@@ -193,13 +193,13 @@ export class RecipeCarousel {
 
       // 모바일에서는 Z축 깊이를 줄임
       if (isMobile) {
-        if (absPos === 1) return -50;  // 바로 옆 카드는 앞쪽으로
-        return -280; // 바깥쪽 카드는 더 뒤로
+        if (absPos === 1) return -10;  // 바로 옆 카드: 더 앞으로
+        return -220; // 바깥쪽 카드는 더 뒤로
       }
 
       // 데스크톱 - 참고 코드와 동일한 깊이 값
-      if (absPos === 1) return -50; // 바로 옆 카드는 앞쪽으로
-      return -300; // 바깥쪽 카드는 더 뒤로
+      if (absPos === 1) return -12; // 바로 옆 카드: 더 앞으로
+      return -200; // 바깥쪽 카드는 더 뒤로
     };
 
     // Y축 회전 (바로 옆 카드도 바깥쪽 카드처럼 기울이기)
@@ -209,17 +209,17 @@ export class RecipeCarousel {
 
       // 모바일에서는 기울기를 줄임
       if (isMobile) {
-        if (absPos === 1) return pos * -35; // 바로 옆 카드
-        return pos * 40; // 바깥쪽 카드
+        if (absPos === 1) return pos * -32; // 바로 옆 카드
+        return pos * -33; // 바깥쪽 카드(옆과 거의 동일)
       }
 
       // 데스크톱 - 참고 코드와 동일한 기울기
-      if (absPos === 1) return pos * -45; // 바로 옆 카드 기울기
-      return pos * 50; // 바깥쪽 카드 기울기
+      if (absPos === 1) return pos * -40; // 바로 옆 카드 기울기
+      return pos * -37; // 바깥쪽 카드 기울기(옆과 거의 동일)
     };
 
-    // Scale (중앙은 1, 나머지는 0.75)
-    const scale = isCenter ? 1 : 0.75;
+    // Scale (중앙 1, 옆카드 0.9, 바깥카드 0.75)
+    const scale = absPos === 0 ? 1 : (absPos === 1 ? 0.8 : 0.75);
 
     // Opacity - 모든 카드가 보이도록 조정
     const opacity = isCenter ? 1 : 0.6;

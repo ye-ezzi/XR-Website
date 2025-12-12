@@ -30,7 +30,7 @@ document.addEventListener('DOMContentLoaded', () => {
     onCardClick: (cardData, cardElement) => {
       console.log('Recipe card clicked:', cardData);
       recipeCarousel.hide();
-      document.getElementById('3d-receipt-popup').style.display = 'flex';
+      // 상세 팝업 제거됨: 카드 클릭 시 동작만 로그로 남김
     }
   });
 
@@ -379,6 +379,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // 드래그 가능한 팝업 기능
   function initDraggablePopup() {
     const recipePopup = document.getElementById('3d-receipt-popup');
+    if (!recipePopup) return;
     const popupContent = recipePopup.querySelector('.popup-content');
 
     let isDragging = false;
@@ -477,12 +478,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const zoomSliderFill = document.getElementById('zoom-slider-fill');
     const zoomSliderThumb = document.getElementById('zoom-slider-thumb');
     const zoomValue = document.getElementById('zoom-value');
-    const zoomPlayPauseBtn = document.getElementById('zoom-play-pause');
 
     let currentProgress = 0; // 0% ~ 100%
     let isDraggingSlider = false;
     let currentVideoElement = null;
-    let isPlaying = false;
 
     // 줌 진행도 업데이트 함수 (영상 시간을 조절)
     function updateZoomProgress(progress) {
@@ -501,23 +500,6 @@ document.addEventListener('DOMContentLoaded', () => {
         currentVideoElement.currentTime = targetTime;
       }
     }
-
-    // 재생/일시정지 버튼
-    zoomPlayPauseBtn.addEventListener('click', () => {
-      if (!currentVideoElement) return;
-
-      if (isPlaying) {
-        currentVideoElement.pause();
-        zoomPlayPauseBtn.textContent = '▶';
-        isPlaying = false;
-        console.log('Video paused');
-      } else {
-        currentVideoElement.play();
-        zoomPlayPauseBtn.textContent = '❚❚';
-        isPlaying = true;
-        console.log('Video playing');
-      }
-    });
 
     // 확대 버튼 (진행도 10% 증가)
     zoomInBtn.addEventListener('click', () => {
