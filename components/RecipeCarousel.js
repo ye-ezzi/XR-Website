@@ -229,6 +229,7 @@ export class RecipeCarousel {
 
     // Transform 적용
     card.style.transform = `
+      translate(-50%, -50%)
       translateX(${getTranslateX(position)}px)
       translateZ(${getTranslateZ(position)}px)
       rotateY(${getRotateY(position)}deg)
