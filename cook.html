@@ -8,6 +8,8 @@
   <link rel="stylesheet" href="/styles/components/video-container.css" />
   <link rel="stylesheet" href="/styles/components/recipe-popup.css" />
   <link rel="stylesheet" href="/styles/components/recipe-carousel.css" />
+  <link rel="stylesheet" href="/styles/components/food-record-popup.css" />
+  <link rel="stylesheet" href="/styles/components/zoom-control.css" />
   <script src="https://cdnjs.cloudflare.com/ajax/libs/lottie-web/5.12.2/lottie.min.js"></script>
   <style>
     * {
@@ -337,8 +339,7 @@
       width: 32px;
       height: 32px;
       border-radius: 50%;
-      background: rgba(255, 255, 255, 0.1);
-      border: 1px solid rgba(255, 255, 255, 0.3);
+      background: rgba(0, 0, 0, 0.1);
       color: #fff;
       font-size: 20px;
       cursor: pointer;
@@ -349,16 +350,12 @@
       z-index: 10;
     }
 
-    .popup-close-btn:hover {
-      background: rgba(255, 255, 255, 0.2);
-      border-color: rgba(244, 207, 21, 0.8);
-      transform: scale(1.1);
-    }
 
     .popup-close-btn:active {
       transform: scale(0.95);
     }
 
+    /* 음식 기록하기 팝업 (컴포넌트 스타일) */
     /* 탐색 이미지 컨테이너 */
     .scan-image-container {
       position: fixed;
@@ -528,189 +525,6 @@
     .measure-tag-btn:hover {
       background: rgba(244, 207, 21, 0.5);
       border-color: rgba(244, 207, 21, 1);
-    }
-
-    /* 확대하기 컨트롤 UI */
-    .zoom-control {
-      position: fixed;
-      bottom: 120px;
-      left: 50%;
-      transform: translateX(-50%);
-      display: none;
-      align-items: center;
-      gap: 12px;
-      padding: 14px 18px;
-      background: rgba(255, 255, 255, 0.05);
-      backdrop-filter: blur(4px) saturate(190%) contrast(110%);
-      -webkit-backdrop-filter: blur(32px) saturate(10%) contrast(10%);
-      filter: drop-shadow(0 0 2px rgba(255, 255, 255, 0.02));
-      border-radius: 999px;
-      z-index: 1500;
-      box-shadow:
-        0 12px 40px rgba(0, 0, 0, 0.35),
-        inset 0 1px 0 rgba(255,255,255,0.2);
-      position: relative;
-      overflow: hidden;
-      width: fit-content;
-      max-width: calc(100% - 32px);
-    }
-
-    .zoom-control::before {
-      content: "";
-      position: absolute;
-      inset: 0;
-      border-radius: inherit;
-      padding: 1.1px;
-      background: linear-gradient(135deg,
-        rgba(255,255,255,0.65),
-        rgba(255, 255, 255, 0.064),
-        rgba(255,255,255,0.65));
-      -webkit-mask:
-        linear-gradient(#fff 0 0) content-box,
-        linear-gradient(#fff 0 0);
-      mask:
-        linear-gradient(#fff 0 0) content-box,
-        linear-gradient(#fff 0 0);
-      -webkit-mask-composite: xor;
-      mask-composite: exclude;
-      pointer-events: none;
-    }
-
-    .zoom-control.active {
-      display: flex;
-    }
-
-    .zoom-btn {
-      width: 42px;
-      height: 42px;
-      border-radius: 40px;
-      background: linear-gradient(145deg, rgba(255,255,255,0.22), rgba(255,255,255,0.08));
-      border: 1px solid rgba(255, 255, 255, 0.35);
-      color: #fff;
-      font-size: 20px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      transition: all 0.2s ease;
-      user-select: none;
-      box-shadow:
-        0 8px 24px rgba(0,0,0,0.25);
-    }
-
-    .zoom-btn svg {
-      width: 18px;
-      height: 18px;
-      stroke: white;
-      stroke-width: 2.2;
-      stroke-linecap: round;
-    }
-
-    .zoom-btn:hover {
-      background: rgba(255, 255, 255, 0.28);
-      border-color: rgba(255, 255, 255, 0.6);
-      transform: translateY(-1px);
-    }
-
-    .zoom-btn:active {
-      transform: scale(0.95);
-    }
-
-    .zoom-slider {
-      width: clamp(120px, 22vw, 170px);
-      height: 8px;
-      border-radius: 999px;
-      background: rgba(255, 255, 255, 0.18);
-      position: relative;
-      cursor: pointer;
-      box-shadow: inset 0 1px 0 rgba(255,255,255,0.25);
-    }
-
-    .zoom-slider-fill {
-      height: 100%;
-      background: linear-gradient(90deg, #f49f15, #ff8000);
-      border-radius: 999px;
-      width: 0%;
-      transition: width 0.1s ease;
-      box-shadow: 0 0 12px rgba(244, 207, 21, 0.4);
-    }
-
-    .zoom-slider-thumb {
-      position: absolute;
-      top: 50%;
-      left: 0%;
-      transform: translate(-50%, -50%);
-      width: 18px;
-      height: 18px;
-      border-radius: 50%;
-      background: rgba(255,255,255,0.9);
-      border: 2px solid rgba(255,255,255,0.65);
-      cursor: grab;
-      transition: left 0.1s ease, box-shadow 0.2s ease;
-      box-shadow:
-        0 3px 10px rgba(0, 0, 0, 0.3),
-        inset 0 1px 0 rgba(255,255,255,0.65);
-    }
-
-    .zoom-slider-thumb:active {
-      cursor: grabbing;
-    }
-
-    .zoom-value {
-      color: #ffffff;
-      font-size: 16px;
-      font-weight: 600;
-      min-width: 50px;
-      text-align: center;
-    }
-
-    /* 모바일 반응형 */
-  @media (max-width: 768px) {
-    .zoom-control {
-      bottom: 100px;
-      padding: 12px 14px;
-      gap: 8px;
-      max-width: calc(100% - 24px);
-    }
-
-    .zoom-btn {
-      width: 38px;
-      height: 38px;
-      font-size: 18px;
-    }
-
-    .zoom-slider {
-      width: clamp(110px, 30vw, 150px);
-    }
-
-    .zoom-value {
-      font-size: 14px;
-      min-width: 45px;
-    }
-  }
-
-  @media (max-width: 480px) {
-    .zoom-control {
-      bottom: 90px;
-      padding: 11px 12px;
-      gap: 6px;
-      max-width: calc(100% - 18px);
-    }
-
-    .zoom-btn {
-      width: 34px;
-      height: 34px;
-      font-size: 17px;
-    }
-
-      .zoom-slider {
-        width: clamp(100px, 36vw, 130px);
-      }
-
-      .zoom-value {
-        font-size: 13px;
-        min-width: 40px;
-      }
     }
 
     /* Recipe Popup Styles */
@@ -1035,53 +849,6 @@
       <div class="zoom-value" id="zoom-value">1.0x</div>
     </div>
 
-  <div id="measure-popup" class="tab-popup" style="display: none;">
-    <div class="popup-content">
-      <h3>측정하기 팝업</h3>
-      <p>측정 기능이 완료되었습니다.</p>
-      <div class="popup-actions">
-        <button class="close-popup">닫기</button>
-      </div>
-    </div>
-  </div>
-
-  <div id="record-popup" class="tab-popup" style="display: none;">
-    <div class="popup-content" style="max-width: 480px; position: relative; padding: 16px;">
-      <button class="popup-close-btn" onclick="document.getElementById('record-popup').style.display='none'" style="top: 12px; right: 12px; width: 28px; height: 28px; font-size: 18px;">×</button>
-      <h3 style="margin-bottom: 16px; font-size: 18px;">📸 음식 기록하기</h3>
-
-      <!-- Capture food 이미지 -->
-      <div style="margin-bottom: 16px;">
-        <img src="/images/Capture food.png" alt="Capture Food" style="width: 80%; display: block; margin: 0 auto; border-radius: 10px; box-shadow: 0 3px 10px rgba(0,0,0,0.3);" />
-      </div>
-
-      <!-- 설명 입력 폼 -->
-      <div style="margin-bottom: 16px;">
-        <label style="display: block; margin-bottom: 6px; color: #F4CF15; font-weight: 600; font-size: 13px;">설명 작성</label>
-        <textarea id="food-description"
-                  placeholder="음식에 대한 설명을 작성해주세요..."
-                  style="width: 100%; min-height: 96px; padding: 10px; border-radius: 8px; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.2); color: #fff; font-family: inherit; font-size: 13px; resize: vertical;"
-        ></textarea>
-      </div>
-
-      <div class="popup-actions">
-        <button class="close-popup" onclick="document.getElementById('record-popup').style.display='none'" style="padding: 8px 12px; font-size: 13px;">취소</button>
-        <button class="close-popup primary" onclick="saveRecord()" style="padding: 8px 12px; font-size: 13px;">저장하기</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- 저장 완료 팝업 -->
-  <div id="save-success-popup" class="tab-popup" style="display: none;">
-    <div class="popup-content" style="text-align: center;">
-      <h3 style="color: #F4CF15; margin-bottom: 12px;">✓ 저장되었습니다</h3>
-      <p style="margin-bottom: 20px;">음식 기록이 성공적으로 저장되었습니다.</p>
-      <div class="popup-actions" style="justify-content: center;">
-        <button class="close-popup primary" onclick="document.getElementById('save-success-popup').style.display='none'">확인</button>
-      </div>
-    </div>
-  </div>
-
   <!-- 영양소 분석 팝업 -->
   <div id="nutrition-popup" class="tab-popup" style="display: none;">
     <div class="popup-content" style="max-width: 500px; position: relative; padding: 20px;">
@@ -1175,72 +942,7 @@
   <!-- Recipe Carousel for 3D Recipe Mode -->
   <div id="recipe-carousel-overlay" class="recipe-carousel-overlay">
     <div class="recipe-carousel-container">
-      <div class="recipe-carousel-track" id="carousel-track">
-        <!-- Recipe Card 1 -->
-        <div class="recipe-carousel-card center" data-index="0">
-          <button class="card-close-btn" onclick="closeRecipeCarousel()" aria-label="레시피 캐러셀 닫기">×</button>
-          <img src="/images/recipe-example.jpg" alt="Recipe" class="recipe-card-image" />
-          <div class="recipe-card-info">
-            <div>
-              <h3 class="recipe-card-title">토마토 스파게티</h3>
-              <p class="recipe-card-description">"I look at the stars and with all my being feel that I am a part of one of these stars."</p>
-            </div>
-            <div class="recipe-card-meta">Medium: Oil on canvas • Dimensions: 29×36 1/4 in.</div>
-          </div>
-        </div>
-
-        <!-- Recipe Card 2 -->
-        <div class="recipe-carousel-card right" data-index="1">
-          <button class="card-close-btn" onclick="closeRecipeCarousel()" aria-label="레시피 캐러셀 닫기">×</button>
-          <img src="/images/recipe-example.jpg" alt="Recipe" class="recipe-card-image" />
-          <div class="recipe-card-info">
-            <div>
-              <h3 class="recipe-card-title">김치찌개</h3>
-              <p class="recipe-card-description">"Taste the authentic Korean flavor with this hearty kimchi stew."</p>
-            </div>
-            <div class="recipe-card-meta">Cooking time: 30 min • Difficulty: Easy</div>
-          </div>
-        </div>
-
-        <!-- Recipe Card 3 -->
-        <div class="recipe-carousel-card hidden" data-index="2">
-          <button class="card-close-btn" onclick="closeRecipeCarousel()" aria-label="레시피 캐러셀 닫기">×</button>
-          <img src="/images/recipe-example.jpg" alt="Recipe" class="recipe-card-image" />
-          <div class="recipe-card-info">
-            <div>
-              <h3 class="recipe-card-title">불고기</h3>
-              <p class="recipe-card-description">"Sweet and savory Korean BBQ beef that melts in your mouth."</p>
-            </div>
-            <div class="recipe-card-meta">Cooking time: 25 min • Difficulty: Medium</div>
-          </div>
-        </div>
-
-        <!-- Recipe Card 4 -->
-        <div class="recipe-carousel-card hidden" data-index="3">
-          <button class="card-close-btn" onclick="closeRecipeCarousel()" aria-label="레시피 캐러셀 닫기">×</button>
-          <img src="/images/recipe-example.jpg" alt="Recipe" class="recipe-card-image" />
-          <div class="recipe-card-info">
-            <div>
-              <h3 class="recipe-card-title">된장찌개</h3>
-              <p class="recipe-card-description">"Traditional Korean soybean paste stew with vegetables."</p>
-            </div>
-            <div class="recipe-card-meta">Cooking time: 20 min • Difficulty: Easy</div>
-          </div>
-        </div>
-
-        <!-- Recipe Card 5 -->
-        <div class="recipe-carousel-card left" data-index="4">
-          <button class="card-close-btn" onclick="closeRecipeCarousel()" aria-label="레시피 캐러셀 닫기">×</button>
-          <img src="/images/recipe-example.jpg" alt="Recipe" class="recipe-card-image" />
-          <div class="recipe-card-info">
-            <div>
-              <h3 class="recipe-card-title">비빔밥</h3>
-              <p class="recipe-card-description">"Colorful mixed rice bowl with vegetables and gochujang sauce."</p>
-            </div>
-            <div class="recipe-card-meta">Cooking time: 15 min • Difficulty: Easy</div>
-          </div>
-        </div>
-      </div>
+      <div class="recipe-carousel-track" id="carousel-track"></div>
 
       <!-- Bottom glass controller -->
       <div class="carousel-bottom-bar">
@@ -1251,6 +953,13 @@
         </button>
         <div class="carousel-thumb">
           <img src="/images/recipe-example.jpg" alt="현재 레시피 썸네일" />
+        </div>
+        <div class="bottom-bar-recipe">
+          <div class="recipe-name">토마토 스파게티</div>
+          <div class="recipe-meta">
+            <span>시간 30분</span>
+            <span>2인분</span>
+          </div>
         </div>
         <button class="carousel-pill-btn next" onclick="nextRecipe()" aria-label="다음 레시피">
           <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
@@ -1287,31 +996,6 @@
 
   <script type="module" src="/cooking.js"></script>
   <script>
-    // 음식 기록 저장 함수
-    function saveRecord() {
-      const description = document.getElementById('food-description').value.trim();
-
-      if (!description) {
-        alert('설명을 입력해주세요.');
-        return;
-      }
-
-      // 저장 로직 (콘솔에 출력)
-      console.log('음식 기록 저장:', {
-        description: description,
-        timestamp: new Date().toISOString()
-      });
-
-      // 기록 팝업 닫기
-      document.getElementById('record-popup').style.display = 'none';
-
-      // 입력 필드 초기화
-      document.getElementById('food-description').value = '';
-
-      // 저장 완료 팝업 표시
-      document.getElementById('save-success-popup').style.display = 'flex';
-    }
-
     // 영양소 분석 팝업 표시 함수
     function showNutritionPopup() {
       // Screen.png 이미지 숨기기

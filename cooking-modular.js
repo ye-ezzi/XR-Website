@@ -4,8 +4,10 @@
  */
 
 import { cookingComponents } from './components/cooking-components.js';
+import { FoodRecordPopup } from './components/FoodRecordPopup.js';
 
 console.log('Cooking mode (modular) loaded');
+let foodRecordPopup;
 
 document.addEventListener('DOMContentLoaded', () => {
   // ========== 컴포넌트 초기화 ==========
@@ -30,6 +32,14 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   // ========== 전역 함수 정의 (HTML onclick 이벤트용) ==========
+  foodRecordPopup = new FoodRecordPopup({
+    onSave: () => {
+      if (typeof window.saveRecord === 'function') {
+        window.saveRecord();
+      }
+    }
+  });
+  window.foodRecordPopup = foodRecordPopup;
 
   // Explore 비디오 재생
   window.playExploreVideo = function() {
@@ -153,8 +163,11 @@ function showTabPopup(buttonAlt) {
       popupId = 'zoom-popup';
       break;
     case 'Record':
-      popupId = 'record-popup';
-      break;
+      if (foodRecordPopup) {
+        foodRecordPopup.show();
+        console.log('Showing record popup (component)');
+      }
+      return;
     default:
       console.log('Unknown button:', buttonAlt);
       return;
@@ -172,6 +185,10 @@ function closeAllPopups() {
   popups.forEach(popup => {
     popup.style.display = 'none';
   });
+
+  if (window.foodRecordPopup) {
+    window.foodRecordPopup.hide();
+  }
 
   // 레시피 팝업도 닫기
   const components = cookingComponents.getRecipePopupManager();
@@ -290,5 +307,24 @@ function initScanImageView() {
       scanOverlay.classList.remove('active');
       console.log('Hiding scan image view');
     }
+  };
+
+  // 음식 기록 저장
+  window.saveRecord = function() {
+    const descriptionInput = document.getElementById('food-description');
+    const description = descriptionInput ? descriptionInput.value.trim() : '';
+    const finalDescription = description || '메모 없이 저장됨';
+    const rating = window.foodRecordPopup ? window.foodRecordPopup.rating : null;
+    const recordPopup = document.getElementById('record-popup');
+
+    console.log('음식 기록 저장:', {
+      description: finalDescription,
+      rating: rating,
+      timestamp: new Date().toISOString()
+    });
+
+    if (descriptionInput) descriptionInput.value = '';
+    if (recordPopup) recordPopup.style.display = 'none';
+    // 저장 완료 팝업 표시 생략 (사용자 요청)
   };
 }

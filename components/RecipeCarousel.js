@@ -6,12 +6,13 @@ export class RecipeCarousel {
   constructor(overlayId, options = {}) {
     this.overlay = document.getElementById(overlayId);
     this.currentIndex = 0;
-    this.totalRecipes = options.totalRecipes || 5;
+    this.totalRecipes = options.totalRecipes || 0;
     this.onCardClick = options.onCardClick || null;
 
     if (this.overlay) {
       this.track = this.overlay.querySelector('.recipe-carousel-track');
       this.cards = this.overlay.querySelectorAll('.recipe-carousel-card');
+      this.totalRecipes = this.cards.length || this.totalRecipes;
       this.setupEventListeners();
     }
   }
@@ -24,7 +25,39 @@ export class RecipeCarousel {
 
     // 카드 클릭 이벤트
     this.cards.forEach((card) => {
-      card.addEventListener('click', () => {
+      card.addEventListener('click', (e) => {
+        // X 버튼 클릭인지 확인
+        const closeBtn = e.target.closest('.card-close-btn');
+        if (closeBtn) {
+          e.stopPropagation();
+          const cardInfo = card.querySelector('.recipe-card-info');
+
+          // expanded 상태이면 먼저 축소
+          if (cardInfo && cardInfo.classList.contains('expanded')) {
+            cardInfo.classList.remove('expanded');
+          } else {
+            // expanded 상태가 아니면 캐러셀 닫기
+            this.hide();
+          }
+          return;
+        }
+
+        // view-more 버튼 클릭인지 확인
+        const viewMoreBtn = e.target.closest('.view-more-btn');
+        if (viewMoreBtn) {
+          e.stopPropagation();
+          const cardInfo = card.querySelector('.recipe-card-info');
+          if (cardInfo) {
+            // 레시피 이미지 URL 가져와서 CSS 변수로 설정
+            const imageElement = card.querySelector('.recipe-card-image');
+            if (imageElement && imageElement.src) {
+              cardInfo.style.setProperty('--recipe-image', `url(${imageElement.src})`);
+            }
+            cardInfo.classList.add('expanded');
+          }
+          return;
+        }
+
         if (!card.classList.contains('center')) {
           // 사이드 카드 클릭 시 중앙으로 이동
           const cardIndex = parseInt(card.getAttribute('data-index'));
@@ -186,20 +219,20 @@ export class RecipeCarousel {
       if (absPos === 2) return pos * 180; // 바깥 카드 간격 더 중앙으로
     };
 
-    // Z축 깊이 (바로 옆 카드가 바깥 카드보다 앞에 오도록)
+    // Z축 깊이 (중앙 카드가 가장 앞에 오도록)
     const getTranslateZ = (pos) => {
       const absPos = Math.abs(pos);
       if (absPos === 0) return 0;
 
       // 모바일에서는 Z축 깊이를 줄임
       if (isMobile) {
-        if (absPos === 1) return -10;  // 바로 옆 카드: 더 앞으로
-        return -220; // 바깥쪽 카드는 더 뒤로
+        if (absPos === 1) return -100;  // 바로 옆 카드: 중앙보다 뒤로
+        return -250; // 바깥쪽 카드는 더 뒤로
       }
 
-      // 데스크톱 - 참고 코드와 동일한 깊이 값
-      if (absPos === 1) return -12; // 바로 옆 카드: 더 앞으로
-      return -200; // 바깥쪽 카드는 더 뒤로
+      // 데스크톱 - 중앙이 가장 앞에 오도록
+      if (absPos === 1) return -100; // 바로 옆 카드: 중앙보다 뒤로
+      return -250; // 바깥쪽 카드는 더 뒤로
     };
 
     // Y축 회전 (바로 옆 카드도 바깥쪽 카드처럼 기울이기)
@@ -222,10 +255,10 @@ export class RecipeCarousel {
     const scale = absPos === 0 ? 1 : (absPos === 1 ? 0.8 : 0.75);
 
     // Opacity - 모든 카드가 보이도록 조정
-    const opacity = isCenter ? 1 : 0.6;
+    const opacity = isCenter ? 1 : (absPos === 1 ? 0.95 : 0.85);
 
     // Z-index (중앙이 가장 높고, 바로 옆이 바깥보다 높음)
-    const zIndex = isCenter ? 10 : 5 - absPos;
+    const zIndex = isCenter ? 100 : 50 - absPos;
 
     // Transform 적용
     card.style.transform = `

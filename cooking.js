@@ -2,6 +2,7 @@
 import { VideoContainer } from './components/VideoContainer.js';
 import { RecipePopupManager, RecipePopup } from './components/RecipePopup.js';
 import { RecipeCarousel } from './components/RecipeCarousel.js';
+import { FoodRecordPopup } from './components/FoodRecordPopup.js';
 
 console.log('Cooking mode loaded');
 
@@ -9,6 +10,7 @@ console.log('Cooking mode loaded');
 let videoContainer;
 let recipePopupManager;
 let recipeCarousel;
+let foodRecordPopup;
 
 document.addEventListener('DOMContentLoaded', () => {
   // ========== 컴포넌트 초기화 ==========
@@ -24,15 +26,212 @@ document.addEventListener('DOMContentLoaded', () => {
   recipePopupManager.register('microwavePopup', new RecipePopup('microwavePopup'));
   recipePopupManager.register('fridgePopup', new RecipePopup('fridgePopup'));
 
+  const recipeData = [
+    {
+      title: '토마토 스파게티',
+      image: '/images/food1.png',
+      rating: 4,
+      reviews: 140,
+      time: '30분',
+      serving: '2인분',
+      description: '평일 저녁, 팬 하나로 완성하는 이 레시피는 신선한 바질과 마늘, 오레가노, 미트볼이 어우러진 진하고 감칠맛 나는 토마토 소스 파스타입니다.',
+      ingredients: ['스파게티 면 100g', '토마토 소스 100ml', '마늘 3쪽', '올리브유 2큰술', '양파 1/2개', '바질 1작은술', '소금 1작은술', '후추 1작은술', '파마산 치즈 (선택)'],
+      steps: [
+        '냄비에 물을 끓이고 소금을 넣은 후 스파게티 면을 8-10분간 삶습니다.',
+        '마늘과 양파를 잘게 다집니다.',
+        '팬에 올리브유를 두르고 마늘과 양파를 볶습니다.',
+        '토마토 소스를 넣고 중불에서 5분간 잘 섞습니다.',
+        '삶은 스파게티 면을 소스에 넣고 잘 섞습니다.',
+        '소금, 후추로 간을 맞추고 바질을 올립니다.',
+        '접시에 담고 파마산 치즈를 뿌려 완성합니다.'
+      ]
+    },
+    {
+      title: '베이컨 김치 크림 리조또',
+      image: '/images/food2.png',
+      rating: 3.5,
+      reviews: 60,
+      time: '15분',
+      serving: '1인분',
+      description: '한국인의 소울푸드 김치를 우유와 치즈로 부드럽게 재해석한 \'원팬\' 요리입니다.',
+      ingredients: ['밥 1공기', '잘 익은 김치 1/2컵', '베이컨 3줄', '우유 200ml', '양파 1/4개', '체다 치즈 1장', '다진 마늘 1큰술', '버터'],
+      steps: [
+        '김치와 베이컨, 양파는 손가락으로 떼먹기 좋게 잘게 다집니다.',
+        '깊은 팬에 기름을 두르고 다진 마늘과 베이컨, 양파를 노릇하게 볶습니다.',
+        '김치를 넣고 숨이 죽을 때까지 충분히 볶아 신맛을 날려줍니다.',
+        '밥을 넣고 재료와 잘 섞이도록 고슬고슬하게 볶아줍니다.',
+        '우유를 붓고 밥알이 부드럽게 퍼질 때까지 중약불에서 저어가며 끓입니다.'
+      ]
+    },
+    {
+      title: '해물 볶음 우동',
+      image: '/images/food3.png',
+      rating: 4,
+      reviews: 42,
+      time: '15분',
+      serving: '1인분',
+      description: '탱글탱글한 우동 면발에 신선한 해산물과 아삭한 양배추, 감칠맛 나는 굴소스를 넣어 센 불에 빠르게 볶아낸 별미 볶음 우동입니다.',
+      ingredients: ['우동 사리 1개', '냉동 해물 믹스 1줌', '양배추 1/8통', '양파 1/4개', '대파', '굴소스 2큰술', '간장 1큰술', '가쓰오부시(선택)'],
+      steps: [
+        '끓는 물에 우동 면을 1분간 살짝 데쳐 찬물에 헹궈 물기를 뺍니다.',
+        '해산물은 깨끗이 씻어두고, 양배추와 양파는 굵게 채 썹니다.',
+        '팬에 식용유를 두르고 편으로 센 마늘과 대파를 볶아 향을 냅니다.',
+        '해산물, 양파, 양배추를 넣고 센 불에서 빠르게 볶아 불맛을 입힙니다.',
+        '데친 우동 면과 굴소스, 간장, 설탕을 넣고 간이 잘 배도록 볶습니다.',
+        '그릇에 담고 가쓰오부시나 쪽파를 뿌려 완성합니다.'
+      ]
+    },
+    {
+      title: '챱스테이크',
+      image: '/images/food4.png',
+      rating: 2.5,
+      reviews: 58,
+      time: '20분',
+      serving: '2인분',
+      description: '특별한 날, 한 입 크기로 썬 소고기와 아삭한 파프리카, 양파를 달콤 짭조름한 소스에 볶아낸 육즙 가득한 찹스테이크입니다.',
+      ingredients: ['된장 2큰술', '두부 1/2모', '애호박 1/2개', '감자 1개', '대파 1대', '청양고추 2개'],
+      steps: ['감자와 애호박을 먹기 좋은 크기로 썰어줍니다.', '물을 끓이고 된장을 푼 후 감자를 넣습니다.', '애호박, 두부를 넣고 끓입니다.', '대파와 고추를 넣고 한소끔 끓입니다.']
+    },
+    {
+      title: '꾸덕 3분 초코 브라우니',
+      image: '/images/food5.png',
+      rating: 3,
+      reviews: 102,
+      time: '15분',
+      serving: '1인분',
+      description: '오븐 없이 전자레인지로 완성하는 이 레시피는 진한 초콜릿의 풍미와 쫀득한 식감이 살아있어, 당 충전이 필요한 오후에 완벽한 디저트입니다.',
+      ingredients: ['밥 1공기', '고추장 2큰술', '참기름 1큰술', '시금치 50g', '당근 50g', '숙주 50g', '계란 1개'],
+      steps: ['각종 나물을 데쳐서 준비합니다.', '계란을 프라이로 익힙니다.', '그릇에 밥을 담고 나물을 올립니다.', '계란 프라이를 올리고 고추장과 참기름을 넣어 비벼먹습니다.']
+    }
+  ];
+
+  const buildCarouselCards = () => {
+    const track = document.getElementById('carousel-track');
+    if (!track) return;
+    track.innerHTML = '';
+
+    recipeData.forEach((item, index) => {
+      const card = document.createElement('div');
+      card.className = 'recipe-carousel-card' + (index === 0 ? ' center' : index === 1 ? ' right' : index === recipeData.length - 1 ? ' left' : ' hidden');
+      card.setAttribute('data-index', String(index));
+
+      const ingredientTags = item.ingredients ? item.ingredients.map(ing => `<span class="badge">${ing}</span>`).join('') : '';
+      const stepsList = item.steps ? item.steps.map((step, idx) => `<li>${idx + 1}. ${step}</li>`).join('') : '';
+
+      card.innerHTML = `
+        <button class="card-close-btn" aria-label="레시피 캐러셀 닫기">×</button>
+        <img src="${item.image}" alt="${item.title}" class="recipe-card-image" />
+        <div class="recipe-card-info">
+          <div class="recipe-info-top">
+            <div>
+              <h3 class="recipe-card-title">${item.title}</h3>
+              <div class="recipe-rating-row">
+                <div class="rating-stars">
+                  ${buildStars(item.rating)}
+                </div>
+                <span class="recipe-rating-count">후기 ${item.reviews}명</span>
+              </div>
+              <div class="recipe-badges">
+                <span class="badge">${item.time}</span>
+                <span class="badge">${item.serving}</span>
+              </div>
+            </div>
+            <button class="recipe-bookmark" aria-label="즐겨찾기">
+              <img src="/images/save.svg" alt="저장하기" />
+            </button>
+          </div>
+          <p class="recipe-card-description">${item.description}</p>
+          <div class="view-more-btn">
+            <img src="/images/view more.svg" alt="더보기" />
+          </div>
+
+          <div class="recipe-detail-content">
+            <div class="recipe-section">
+              <h4 class="recipe-section-title">재료 준비</h4>
+              <div class="recipe-ingredients">
+                ${ingredientTags}
+              </div>
+            </div>
+
+            <div class="recipe-section">
+              <h4 class="recipe-section-title">조리 순서</h4>
+              <ol class="recipe-steps">
+                ${stepsList}
+              </ol>
+            </div>
+          </div>
+        </div>
+      `;
+
+      track.appendChild(card);
+    });
+  };
+
+  const buildStars = (rating) => {
+    const stars = [];
+    for (let i = 1; i <= 5; i++) {
+      const empty = i > Math.round(rating);
+      const starSrc = empty ? '/images/star.svg' : '/images/star_active.svg';
+      stars.push(`<img src="${starSrc}" class="${empty ? 'empty' : 'filled'}" alt="별" />`);
+    }
+    return stars.join('');
+  };
+
+  buildCarouselCards();
+
+  const updateCarouselBottomBar = () => {
+    const bottomBar = document.querySelector('.carousel-bottom-bar');
+    if (!bottomBar || !recipeCarousel) return;
+
+    const currentIndex = recipeCarousel.getCurrentIndex();
+    const currentRecipe = recipeData[currentIndex];
+    if (!currentRecipe) return;
+
+    const nameEl = bottomBar.querySelector('.recipe-name');
+    const metaEl = bottomBar.querySelector('.recipe-meta');
+    const thumbImg = bottomBar.querySelector('.carousel-thumb img');
+
+    if (nameEl) nameEl.textContent = currentRecipe.title || '';
+
+    if (metaEl) {
+      metaEl.innerHTML = '';
+      if (currentRecipe.time) {
+        const timeSpan = document.createElement('span');
+        timeSpan.textContent = currentRecipe.time;
+        metaEl.appendChild(timeSpan);
+      }
+      if (currentRecipe.serving) {
+        const servingSpan = document.createElement('span');
+        servingSpan.textContent = currentRecipe.serving;
+        metaEl.appendChild(servingSpan);
+      }
+    }
+
+    if (thumbImg && currentRecipe.image) {
+      thumbImg.src = currentRecipe.image;
+      thumbImg.alt = currentRecipe.title || thumbImg.alt;
+    }
+  };
+
   // 레시피 캐러셀 (개선된 3D 효과)
   recipeCarousel = new RecipeCarousel('recipe-carousel-overlay', {
     totalRecipes: 5,
     onCardClick: (cardData, cardElement) => {
       console.log('Recipe card clicked:', cardData);
-      recipeCarousel.hide();
-      // 상세 팝업 제거됨: 카드 클릭 시 동작만 로그로 남김
+      // X 버튼으로만 닫기 가능하도록 변경
     }
   });
+  updateCarouselBottomBar();
+
+  // 음식 기록하기 팝업 컴포넌트
+  foodRecordPopup = new FoodRecordPopup({
+    onSave: () => {
+      if (typeof window.saveRecord === 'function') {
+        window.saveRecord();
+      }
+    }
+  });
+  window.foodRecordPopup = foodRecordPopup;
 
   // ========== 기존 코드 ==========
   const tabs = document.querySelectorAll('.bottom-bar-item');
@@ -343,8 +542,11 @@ document.addEventListener('DOMContentLoaded', () => {
         popupId = 'zoom-popup';
         break;
       case 'Record':
-        popupId = 'record-popup';
-        break;
+        if (foodRecordPopup) {
+          foodRecordPopup.show();
+          console.log('Showing popup: record-popup');
+        }
+        return;
       default:
         console.log('Unknown button:', buttonAlt);
         return;
@@ -622,6 +824,7 @@ document.addEventListener('DOMContentLoaded', () => {
   window.showRecipeCarousel = function() {
     console.log('Showing recipe carousel using RecipeCarousel component');
     recipeCarousel.show();
+    updateCarouselBottomBar();
   };
 
   window.closeRecipeCarousel = function() {
@@ -631,11 +834,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
   window.nextRecipe = function() {
     recipeCarousel.next();
+    updateCarouselBottomBar();
     console.log('Next recipe:', recipeCarousel.getCurrentIndex());
   };
 
   window.previousRecipe = function() {
     recipeCarousel.previous();
+    updateCarouselBottomBar();
     console.log('Previous recipe:', recipeCarousel.getCurrentIndex());
   };
 
@@ -665,21 +870,27 @@ document.addEventListener('DOMContentLoaded', () => {
   // ========== Record 관련 함수 ==========
   window.saveRecord = function() {
     console.log('Saving record');
+    const descriptionInput = document.getElementById('food-description');
+    const description = descriptionInput ? descriptionInput.value.trim() : '';
+    const finalDescription = description || '메모 없이 저장됨';
+    const rating = window.foodRecordPopup ? window.foodRecordPopup.rating : null;
     const recordPopup = document.getElementById('record-popup');
-    const successPopup = document.getElementById('save-success-popup');
+
+    console.log('음식 기록 저장:', {
+      description: finalDescription,
+      rating: rating,
+      timestamp: new Date().toISOString()
+    });
 
     if (recordPopup) {
       recordPopup.style.display = 'none';
     }
 
-    if (successPopup) {
-      successPopup.style.display = 'flex';
-
-      // 2초 후 자동으로 닫기
-      setTimeout(() => {
-        successPopup.style.display = 'none';
-      }, 2000);
+    if (descriptionInput) {
+      descriptionInput.value = '';
     }
+
+    // 저장 완료 팝업 표시 생략 (사용자 요청)
   };
 
 });
