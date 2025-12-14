@@ -774,12 +774,17 @@
     height: 32px;
     font-size: 18px;
   }
+
+  .card-close-btn::after {
+    width: 14px;
+    height: 14px;
+  }
 }
 
 @media (max-width: 480px) {
   .recipe-carousel-container {
     width: 94vw;
-    height: 55vh;
+    height: 68vh;
   }
 
   .recipe-carousel-card {
@@ -800,12 +805,12 @@
   }
 
   .recipe-card-image {
-    height: 60%;
+    height: 100%;
   }
 
   .recipe-card-info {
-    height: 40%;
-    padding: 16px;
+    height: 48%;
+    padding: 14px;
   }
 
   .carousel-bottom-bar {
@@ -841,6 +846,10 @@
     right: 12px;
     width: 30px;
     height: 30px;
-    font-size: 17px;
+  }
+
+  .card-close-btn::after {
+    width: 12px;
+    height: 12px;
   }
 }

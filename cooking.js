@@ -465,6 +465,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const initialTab = document.querySelector('[data-target-content="scan-content"]');
     if (initialTab) {
       updateTabState(initialTab);
+      // 페이지 로드 시 탐색 비디오 자동 재생
+      videoContainer.play('/videos/explore.mp4', () => {
+        console.log('Initial explore video ended - showing recipe popups');
+        recipePopupManager.show('microwavePopup');
+        recipePopupManager.show('fridgePopup');
+      });
     } else {
       updateTabState(tabs[0]);
     }
