@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
   <title>요리 모드</title>
   <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css" />
   <link rel="stylesheet" href="/styles/components/video-container.css" />
@@ -56,7 +56,7 @@
     /* Bottom fixed bar with Glass Effect */
     .bottom-bar {
       position: fixed;
-      bottom: max(15px, env(safe-area-inset-bottom, 15px));
+      bottom: calc(15px + env(safe-area-inset-bottom, 0px));
       left: 50%;
       transform: translateX(-50%);
       width: fit-content;
@@ -175,7 +175,7 @@
       .bottom-bar {
         padding: 6px 10px;
         gap: 6px;
-        bottom: max(10px, env(safe-area-inset-bottom, 10px));
+        bottom: calc(15px + env(safe-area-inset-bottom, 0px));
       }
 
       .bottom-bar-item {
@@ -206,7 +206,7 @@
       .bottom-bar {
         padding: 8px 8px;
         gap: 6px;
-        bottom: max(8px, env(safe-area-inset-bottom, 8px));
+        bottom: calc(20px + env(safe-area-inset-bottom, 0px));
       }
 
       .bottom-bar-item {
