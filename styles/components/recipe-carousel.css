@@ -778,6 +778,8 @@
   .card-close-btn::after {
     width: 14px;
     height: 14px;
+    display: block;
+    flex-shrink: 0;
   }
 }
 
@@ -802,7 +804,7 @@
   }
 
   .recipe-card-meta {
-    font-size: 11px;
+    font-size: 13px;
   }
 
   .recipe-card-image {
@@ -852,5 +854,7 @@
   .card-close-btn::after {
     width: 12px;
     height: 12px;
+    display: block;
+    flex-shrink: 0;
   }
 }
