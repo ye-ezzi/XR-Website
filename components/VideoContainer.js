@@ -78,21 +78,15 @@ export class VideoContainer {
       const loadTime = loadEndTime - loadStartTime;
       console.log(`Video ready in ${loadTime.toFixed(2)}ms`);
 
-      // 이미 visible 클래스가 추가되었으면 중복 실행 방지
-      if (this.container.classList.contains('visible')) {
-        console.log('Container already visible, skipping...');
-        return;
-      }
-
-      if (autoplay) {
-        // 모바일 자동재생 제한 처리
-        console.log('Attempting autoplay...');
+      // 비디오가 재생 중이 아니면 재생 시도
+      if (autoplay && this.videoElement.paused) {
+        console.log('Video ready, attempting to play...');
         const playPromise = this.videoElement.play();
 
         if (playPromise !== undefined) {
           playPromise
             .then(() => {
-              console.log('Video autoplay started successfully');
+              console.log('Video playback started successfully');
               this.autoplayFailed = false;
             })
             .catch((error) => {
@@ -103,9 +97,9 @@ export class VideoContainer {
               this.container.style.cursor = 'pointer';
             });
         }
+      } else if (!this.videoElement.paused) {
+        console.log('Video already playing');
       }
-      this.container.classList.add('visible');
-      console.log('Video container faded in');
     };
 
     // 이벤트 리스너 설정 - loadeddata와 canplay 둘 다 처리
@@ -135,9 +129,30 @@ export class VideoContainer {
     // 컨테이너에 비디오 추가
     this.container.appendChild(this.videoElement);
 
+    // 비디오 표시
+    this.container.classList.add('visible');
+
     // 모바일에서 비디오 로딩 강제
     console.log('Forcing video load...');
     this.videoElement.load();
+
+    // 사용자 클릭 시 즉시 재생 시도 (동기 실행으로 사용자 액션 인식)
+    if (autoplay) {
+      console.log('Attempting immediate play on user action...');
+      const immediatePlayPromise = this.videoElement.play();
+
+      if (immediatePlayPromise !== undefined) {
+        immediatePlayPromise
+          .then(() => {
+            console.log('Immediate play succeeded');
+            this.autoplayFailed = false;
+          })
+          .catch((error) => {
+            console.log('Immediate play failed (video not ready yet), will retry when loaded:', error.message);
+            // 비디오가 준비되면 handleVideoReady에서 다시 시도
+          });
+      }
+    }
   }
 
   /**
