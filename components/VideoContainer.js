@@ -7,6 +7,23 @@ export class VideoContainer {
     this.container = document.getElementById(containerId);
     this.videoElement = null;
     this.onVideoEnd = onVideoEnd;
+    this.autoplayFailed = false;
+    this.setupContainerClickHandler();
+  }
+
+  /**
+   * 컨테이너 클릭 핸들러 설정 (자동재생 실패 시 수동 재생)
+   */
+  setupContainerClickHandler() {
+    if (this.container) {
+      this.container.addEventListener('click', () => {
+        if (this.autoplayFailed && this.videoElement && this.videoElement.paused) {
+          console.log('Playing video on user interaction');
+          this.videoElement.play().catch(e => console.error('Play failed:', e));
+          this.autoplayFailed = false;
+        }
+      });
+    }
   }
 
   /**
@@ -37,6 +54,11 @@ export class VideoContainer {
     this.videoElement.playsInline = true;
     this.videoElement.muted = true;
 
+    // 오래된 iOS 기기 지원
+    this.videoElement.setAttribute('playsinline', '');
+    this.videoElement.setAttribute('webkit-playsinline', '');
+    this.videoElement.setAttribute('x5-playsinline', ''); // WeChat 브라우저 지원
+
     // 이벤트 리스너 설정
     this.videoElement.addEventListener('loadeddata', () => {
       const loadEndTime = performance.now();
@@ -44,7 +66,23 @@ export class VideoContainer {
       console.log(`Video loaded in ${loadTime.toFixed(2)}ms`);
 
       if (autoplay) {
-        this.videoElement.play();
+        // 모바일 자동재생 제한 처리
+        const playPromise = this.videoElement.play();
+
+        if (playPromise !== undefined) {
+          playPromise
+            .then(() => {
+              console.log('Video autoplay started successfully');
+              this.autoplayFailed = false;
+            })
+            .catch((error) => {
+              console.warn('Autoplay was prevented:', error);
+              console.log('Tap screen to play video');
+              this.autoplayFailed = true;
+              // 컨테이너에 시각적 힌트 추가
+              this.container.style.cursor = 'pointer';
+            });
+        }
       }
       this.container.classList.add('visible');
       console.log('Video container faded in');
