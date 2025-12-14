@@ -499,7 +499,7 @@
 /* Bottom controller - 부모 transform 영향 제거 */
 .carousel-bottom-bar {
   position: fixed;
-  bottom: -70px;
+  bottom: -100px;
   left: 50% !important;
   right: auto !important;
   transform: translateX(-50%) !important;
@@ -743,7 +743,7 @@
     left: 50% !important;
     right: auto !important;
     transform: translateX(-50%) !important;
-    bottom: calc(env(safe-area-inset-bottom, 0px) - 60px);
+    bottom: calc(env(safe-area-inset-bottom, 0px) - 80px);
     padding: 10px 12px;
     border-radius: 20px;
     gap: 12px;
