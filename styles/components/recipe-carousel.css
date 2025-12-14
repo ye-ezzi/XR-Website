@@ -784,7 +784,7 @@
 @media (max-width: 480px) {
   .recipe-carousel-container {
     width: 94vw;
-    height: 60vh;
+    height: 50vh;
   }
 
   .recipe-carousel-card {
