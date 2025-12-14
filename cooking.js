@@ -179,6 +179,26 @@ document.addEventListener('DOMContentLoaded', () => {
 
   buildCarouselCards();
 
+  // 북마크 버튼 이벤트 리스너 추가
+  const initBookmarkButtons = () => {
+    const bookmarkButtons = document.querySelectorAll('.recipe-bookmark');
+    bookmarkButtons.forEach(button => {
+      button.addEventListener('click', (e) => {
+        e.stopPropagation();
+        button.classList.toggle('active');
+
+        const img = button.querySelector('img');
+        if (button.classList.contains('active')) {
+          img.src = '/images/save_active.svg';
+        } else {
+          img.src = '/images/save.svg';
+        }
+      });
+    });
+  };
+
+  initBookmarkButtons();
+
   const updateCarouselBottomBar = () => {
     const bottomBar = document.querySelector('.carousel-bottom-bar');
     if (!bottomBar || !recipeCarousel) return;
