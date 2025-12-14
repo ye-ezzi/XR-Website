@@ -119,7 +119,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const stepsList = item.steps ? item.steps.map((step, idx) => `<li>${idx + 1}. ${step}</li>`).join('') : '';
 
       card.innerHTML = `
-        <button class="card-close-btn" aria-label="레시피 캐러셀 닫기">×</button>
+        <button class="card-close-btn" aria-label="레시피 캐러셀 닫기"></button>
         <img src="${item.image}" alt="${item.title}" class="recipe-card-image" />
         <div class="recipe-card-info">
           <div class="recipe-info-top">
