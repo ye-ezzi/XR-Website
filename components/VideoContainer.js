@@ -59,14 +59,34 @@ export class VideoContainer {
     this.videoElement.setAttribute('webkit-playsinline', '');
     this.videoElement.setAttribute('x5-playsinline', ''); // WeChat 브라우저 지원
 
-    // 이벤트 리스너 설정
-    this.videoElement.addEventListener('loadeddata', () => {
+    // 디버깅용 이벤트 리스너
+    this.videoElement.addEventListener('loadstart', () => {
+      console.log('Video loadstart event fired');
+    });
+
+    this.videoElement.addEventListener('loadedmetadata', () => {
+      console.log('Video loadedmetadata event fired');
+    });
+
+    this.videoElement.addEventListener('canplay', () => {
+      console.log('Video canplay event fired');
+    });
+
+    // 비디오 준비 처리 함수
+    const handleVideoReady = () => {
       const loadEndTime = performance.now();
       const loadTime = loadEndTime - loadStartTime;
-      console.log(`Video loaded in ${loadTime.toFixed(2)}ms`);
+      console.log(`Video ready in ${loadTime.toFixed(2)}ms`);
+
+      // 이미 visible 클래스가 추가되었으면 중복 실행 방지
+      if (this.container.classList.contains('visible')) {
+        console.log('Container already visible, skipping...');
+        return;
+      }
 
       if (autoplay) {
         // 모바일 자동재생 제한 처리
+        console.log('Attempting autoplay...');
         const playPromise = this.videoElement.play();
 
         if (playPromise !== undefined) {
@@ -86,7 +106,11 @@ export class VideoContainer {
       }
       this.container.classList.add('visible');
       console.log('Video container faded in');
-    });
+    };
+
+    // 이벤트 리스너 설정 - loadeddata와 canplay 둘 다 처리
+    this.videoElement.addEventListener('loadeddata', handleVideoReady);
+    this.videoElement.addEventListener('canplaythrough', handleVideoReady);
 
     this.videoElement.addEventListener('ended', () => {
       console.log('Video ended');
@@ -105,10 +129,15 @@ export class VideoContainer {
       const loadTime = loadEndTime - loadStartTime;
       console.error(`Error loading video after ${loadTime.toFixed(2)}ms:`, e);
       console.error('Failed video path:', videoPath);
+      console.error('Video error details:', this.videoElement.error);
     });
 
     // 컨테이너에 비디오 추가
     this.container.appendChild(this.videoElement);
+
+    // 모바일에서 비디오 로딩 강제
+    console.log('Forcing video load...');
+    this.videoElement.load();
   }
 
   /**
