@@ -12,6 +12,16 @@
   opacity: 0;
   transition: opacity 0.5s ease;
   pointer-events: none;
+  height: 100vh;
+  height: 100dvh; /* 동적 뷰포트 높이 */
+  overflow: hidden;
+}
+
+/* 구형 브라우저 대응 */
+@supports not (height: 100dvh) {
+  .animation-container {
+    height: calc(var(--vh, 1vh) * 100);
+  }
 }
 
 .animation-container.visible {
@@ -22,9 +32,17 @@
 .animation-container video {
   width: 100vw;
   height: 100vh;
+  height: 100dvh; /* 동적 뷰포트 높이 (주소창 제외) */
   object-fit: cover;
   transform: scale(1.2);
   transform-origin: center;
+}
+
+/* 모바일 높이 고정 (주소창 슬라이드 방지) */
+@supports not (height: 100dvh) {
+  .animation-container video {
+    height: calc(var(--vh, 1vh) * 100);
+  }
 }
 
 /* Loading indicator for video */
