@@ -813,7 +813,7 @@
 
   .recipe-card-info {
     height: 50%;
-    padding: 14px;
+    padding: 10px;
   }
 
   .carousel-bottom-bar {
@@ -852,8 +852,8 @@
   }
 
   .card-close-btn::after {
-    width: 12px;
-    height: 12px;
+    width: 14px;
+    height: 14px;
     display: block;
     flex-shrink: 0;
   }

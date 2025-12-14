@@ -8,6 +8,7 @@ export class RecipeCarousel {
     this.currentIndex = 0;
     this.totalRecipes = options.totalRecipes || 0;
     this.onCardClick = options.onCardClick || null;
+    this.isAnimating = false;
 
     if (this.overlay) {
       this.track = this.overlay.querySelector('.recipe-carousel-track');
@@ -112,6 +113,7 @@ export class RecipeCarousel {
    * 다음 레시피로 이동
    */
   next() {
+    if (this.isAnimating) return;
     this.currentIndex = (this.currentIndex + 1) % this.totalRecipes;
     this.updateCards();
   }
@@ -120,6 +122,7 @@ export class RecipeCarousel {
    * 이전 레시피로 이동
    */
   previous() {
+    if (this.isAnimating) return;
     this.currentIndex = (this.currentIndex - 1 + this.totalRecipes) % this.totalRecipes;
     this.updateCards();
   }
@@ -129,6 +132,7 @@ export class RecipeCarousel {
    * @param {number} index - 이동할 인덱스
    */
   goTo(index) {
+    if (this.isAnimating) return;
     if (index >= 0 && index < this.totalRecipes) {
       this.currentIndex = index;
       this.updateCards();
@@ -158,7 +162,10 @@ export class RecipeCarousel {
   updateCards() {
     if (!this.cards) return;
 
-    this.cards.forEach((card) => {
+    // 애니메이션 시작
+    this.isAnimating = true;
+
+    this.cards.forEach((card, index) => {
       const cardIndex = parseInt(card.getAttribute('data-index'));
       const position = this.getCardPosition(cardIndex);
       const isCenter = position === 0;
@@ -182,6 +189,15 @@ export class RecipeCarousel {
 
       // 고급 3D transform 적용
       this.applyAdvancedTransform(card, position, isCenter);
+
+      // 첫 번째 카드의 transition 완료 후 플래그 해제
+      if (index === 0) {
+        const handleTransitionEnd = () => {
+          this.isAnimating = false;
+          card.removeEventListener('transitionend', handleTransitionEnd);
+        };
+        card.addEventListener('transitionend', handleTransitionEnd);
+      }
     });
   }
 
@@ -224,15 +240,15 @@ export class RecipeCarousel {
       const absPos = Math.abs(pos);
       if (absPos === 0) return 0;
 
-      // 모바일에서는 Z축 깊이를 줄임
+      // Z축 이동을 최소화하여 뒤로 갔다 나오는 현상 방지
       if (isMobile) {
-        if (absPos === 1) return -100;  // 바로 옆 카드: 중앙보다 뒤로
-        return -250; // 바깥쪽 카드는 더 뒤로
+        if (absPos === 1) return -30;  // 바로 옆 카드: 약간만 뒤로
+        return -60; // 바깥쪽 카드
       }
 
-      // 데스크톱 - 중앙이 가장 앞에 오도록
-      if (absPos === 1) return -100; // 바로 옆 카드: 중앙보다 뒤로
-      return -250; // 바깥쪽 카드는 더 뒤로
+      // 데스크톱 - Z축 이동 최소화
+      if (absPos === 1) return -40; // 바로 옆 카드: 약간만 뒤로
+      return -80; // 바깥쪽 카드
     };
 
     // Y축 회전 (바로 옆 카드도 바깥쪽 카드처럼 기울이기)
