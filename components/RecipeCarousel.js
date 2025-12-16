@@ -247,8 +247,8 @@ export class RecipeCarousel {
       }
 
       // 데스크톱 - Z축 이동 최소화
-      if (absPos === 1) return -40; // 바로 옆 카드: 약간만 뒤로
-      return -80; // 바깥쪽 카드
+      if (absPos === 1) return -80; // 바로 옆 카드: 약간만 뒤로
+      return -100; // 바깥쪽 카드
     };
 
     // Y축 회전 (바로 옆 카드도 바깥쪽 카드처럼 기울이기)
