@@ -255,17 +255,21 @@
     font-size: 11px;
   }
 
+  /* 모바일: 팝업을 화면 하단 중앙으로 정렬 */
   #microwavePopup {
-    right: 50%;
-    top: 20%;
-    transform: translateX(50%);
+    left: 100%;
+    right: auto;
+    top: auto;
+    bottom: 22%;
+    transform: translateX(-50%);
   }
 
   #fridgePopup {
-    left: 50%;
-    top: auto;
-    bottom: 15%;
-    transform: translateX(-50%);
+    left: 6% !important;
+    right: auto !important;
+    top: auto !important;
+    bottom: 72% !important;
+    transform: translateX(0) !important;
   }
 
   .popup-indicator {
@@ -305,6 +309,16 @@
   .recipe-tag {
     padding: 4px 8px;
     font-size: 10px;
+  }
+
+  /* 더 작은 모바일에서 약간 위로 올려 시인성 확보 */
+  #microwavePopup {
+    bottom: 24%;
+  }
+
+  #fridgePopup {
+    left: 8% !important;
+    bottom: 26% !important;
   }
 
   .popup-indicator {

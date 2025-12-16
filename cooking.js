@@ -11,6 +11,13 @@ let videoContainer;
 let recipePopupManager;
 let recipeCarousel;
 let foodRecordPopup;
+let gestureZoom;
+let setGestureZoomValue;
+let showGestureZoomOverlay;
+let hideGestureZoomOverlay;
+const BASE_VIDEO_SCALE = 1.2;
+let stopAutoZoomSync;
+let autoZoomSyncedOnce = false;
 
 document.addEventListener('DOMContentLoaded', () => {
   // ========== 컴포넌트 초기화 ==========
@@ -268,8 +275,8 @@ document.addEventListener('DOMContentLoaded', () => {
   // 드래그 기능 초기화
   initDraggablePopup();
 
-  // 확대하기 컨트롤 초기화
-  initZoomControl();
+  // 제스처형 줌 오버레이 초기화
+  initGestureZoom();
 
   // 탐색 이미지 뷰 초기화
   initScanImageView();
@@ -423,8 +430,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
       console.log('Playing video using VideoContainer:', videoPath);
 
-      // Zoom 버튼은 자동재생 안함
-      const autoplay = buttonAlt !== 'Zoom';
+      // Zoom 탭은 항상 수동 재생 (자동재생/자동동기화 없음)
+      const shouldAutoplay = buttonAlt === 'Zoom' ? false : true;
 
       // VideoContainer 컴포넌트를 사용하여 비디오 재생
       videoContainer.play(videoPath, () => {
@@ -444,20 +451,22 @@ document.addEventListener('DOMContentLoaded', () => {
         if (buttonAlt === 'Record') {
           showTabPopup(buttonAlt);
         }
-      }, { autoplay });
+      }, { autoplay: shouldAutoplay });
 
-      // Zoom 버튼인 경우 비디오 로드 후 줌 컨트롤 표시
+      // Zoom 탭일 때만 오버레이 노출 및 현재 줌 적용
       if (buttonAlt === 'Zoom') {
-        // VideoContainer의 비디오 엘리먼트에 접근하기 위해 약간의 지연
-        setTimeout(() => {
-          const videoElement = videoContainer.videoElement;
-          if (videoElement) {
-            window.showZoomControl(videoElement);
-          }
-        }, 100);
+        if (showGestureZoomOverlay) showGestureZoomOverlay();
+        applyGestureZoomToVideo();
+        if (videoContainer && videoContainer.videoElement) {
+          videoContainer.videoElement.pause(); // 강제 정지 상태 유지
+        }
+      } else {
+        if (hideGestureZoomOverlay) hideGestureZoomOverlay(true);
+        resetVideoScale();
+        if (stopAutoZoomSync) stopAutoZoomSync();
       }
-    });
   });
+});
 
   // 페이지 로드 시 첫 번째 탭을 활성 상태로 설정 (옵션)
   if (tabs.length > 0) {
@@ -563,9 +572,6 @@ document.addEventListener('DOMContentLoaded', () => {
     switch(buttonAlt) {
       case 'Scan':
         popupId = 'scan-popup';
-        break;
-      case 'Zoom':
-        popupId = 'zoom-popup';
         break;
       case 'Record':
         if (foodRecordPopup) {
@@ -697,116 +703,193 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // 확대하기 컨트롤 기능
-  function initZoomControl() {
-    const zoomControl = document.getElementById('zoom-control');
-    const zoomInBtn = document.getElementById('zoom-in');
-    const zoomOutBtn = document.getElementById('zoom-out');
-    const zoomSlider = document.getElementById('zoom-slider');
-    const zoomSliderFill = document.getElementById('zoom-slider-fill');
-    const zoomSliderThumb = document.getElementById('zoom-slider-thumb');
-    const zoomValue = document.getElementById('zoom-value');
+  // 제스처형 줌 라인 UI
+  function initGestureZoom() {
+    const overlay = document.createElement('div');
+    overlay.id = 'zoom-gesture-overlay';
+    overlay.className = 'zoom-gesture-overlay';
+    overlay.innerHTML = `
+      <div class="zoom-gesture-banner">
+        터치패드를 클릭 후 위 아래로 드래그해 확대/축소하세요.
+      </div>
+      <div class="zoom-gesture-line">
+        <div class="zoom-gesture-hands">
+          <div class="zoom-gesture-hand left"></div>
+          <div class="zoom-gesture-hand right"></div>
+        </div>
+        <div class="zoom-gesture-line-core"></div>
+        <div class="zoom-gesture-tag">100%</div>
+        <div class="zoom-gesture-hit"></div>
+      </div>
+    `;
+    document.body.appendChild(overlay);
 
-    let currentProgress = 0; // 0% ~ 100%
-    let isDraggingSlider = false;
-    let currentVideoElement = null;
+    const line = overlay.querySelector('.zoom-gesture-line');
+    const lineCore = overlay.querySelector('.zoom-gesture-line-core');
+    const tag = overlay.querySelector('.zoom-gesture-tag');
+    const hit = overlay.querySelector('.zoom-gesture-hit');
+    const leftHand = overlay.querySelector('.zoom-gesture-hand.left');
+    const rightHand = overlay.querySelector('.zoom-gesture-hand.right');
 
-    // 줌 진행도 업데이트 함수 (영상 시간을 조절)
-    function updateZoomProgress(progress) {
-      currentProgress = Math.max(0, Math.min(100, progress));
-
-      zoomSliderFill.style.width = currentProgress + '%';
-      zoomSliderThumb.style.left = currentProgress + '%';
-
-      // 줌 배율 계산 (0% = 1.0x, 100% = 3.0x)
-      const zoomLevel = 1.0 + (currentProgress / 100) * 2.0;
-      zoomValue.textContent = zoomLevel.toFixed(1) + 'x';
-
-      // 비디오 시간 조절 (진행도에 따라)
-      if (currentVideoElement && currentVideoElement.duration) {
-        const targetTime = (currentProgress / 100) * currentVideoElement.duration;
-        currentVideoElement.currentTime = targetTime;
-      }
-    }
-
-    // 확대 버튼 (진행도 10% 증가)
-    zoomInBtn.addEventListener('click', () => {
-      updateZoomProgress(currentProgress + 10);
-    });
-
-    // 축소 버튼 (진행도 10% 감소)
-    zoomOutBtn.addEventListener('click', () => {
-      updateZoomProgress(currentProgress - 10);
-    });
-
-    // 슬라이더 클릭
-    zoomSlider.addEventListener('mousedown', startDrag);
-    zoomSlider.addEventListener('touchstart', startDrag);
-
-    function startDrag(e) {
-      isDraggingSlider = true;
-      updateSliderPosition(e);
-    }
-
-    document.addEventListener('mousemove', (e) => {
-      if (isDraggingSlider) {
-        updateSliderPosition(e);
-      }
-    });
-
-    document.addEventListener('touchmove', (e) => {
-      if (isDraggingSlider) {
-        updateSliderPosition(e);
-      }
-    });
-
-    document.addEventListener('mouseup', () => {
-      isDraggingSlider = false;
-    });
-
-    document.addEventListener('touchend', () => {
-      isDraggingSlider = false;
-    });
-
-    function updateSliderPosition(e) {
-      const rect = zoomSlider.getBoundingClientRect();
-      const clientX = e.type.includes('touch') ? e.touches[0].clientX : e.clientX;
-      const x = clientX - rect.left;
-      const percentage = Math.max(0, Math.min(100, (x / rect.width) * 100));
-      updateZoomProgress(percentage);
-    }
-
-    // 컨트롤 표시 함수
-    window.showZoomControl = function(videoElement) {
-      zoomControl.classList.add('active');
-
-      // 전달받은 비디오 요소 저장
-      currentVideoElement = videoElement;
-
-      // 초기 진행도 0으로 설정
-      updateZoomProgress(0);
-
-      console.log('Zoom control UI displayed');
-      console.log('Video duration:', currentVideoElement.duration);
+    gestureZoom = {
+      overlay,
+      line,
+      lineCore,
+      tag,
+      leftHand,
+      rightHand,
+      value: 100,
+      dragging: false,
+      startX: 0,
+      startValue: 100,
+      showHands: false,
+      introPlaying: false,
+      manualOverride: false
     };
 
-    // 컨트롤 숨기기 함수
-    window.hideZoomControl = function() {
-      zoomControl.classList.remove('active');
-      currentVideoElement = null;
-      currentProgress = 0;
-    };
+    const clampValue = (v) => Math.max(0, Math.min(300, v));
 
-    // 다른 탭 클릭 시 줌 컨트롤 숨기기
-    const tabs = document.querySelectorAll('.bottom-bar-item');
-    tabs.forEach(tab => {
-      tab.addEventListener('click', () => {
-        const buttonAlt = tab.querySelector('img').alt;
-        if (buttonAlt !== 'Zoom') {
-          window.hideZoomControl();
+    setGestureZoomValue = (v) => {
+      if (!gestureZoom) return;
+      gestureZoom.value = clampValue(v);
+      const normalized = gestureZoom.value / 300; // 0~1
+      const widthPercent = normalized * 80; // 0% ~ 80%
+      lineCore.style.setProperty('--line-width', `${widthPercent}%`);
+      tag.textContent = `${Math.round(gestureZoom.value)}%`;
+      positionHands(widthPercent);
+      applyGestureZoomToVideo();
+
+      // 드래그로 값 조절 중이면 영상 재생 위치를 함께 이동(정/역 방향)
+      if (gestureZoom.manualOverride) {
+        if (videoContainer && videoContainer.videoElement && !videoContainer.videoElement.paused) {
+          videoContainer.videoElement.pause(); // 수동 조작 중에는 영상 정지 유지
         }
-      });
-    });
+        syncVideoTimeToValue();
+      }
+    };
+
+    const getClientX = (e) => (e.touches ? e.touches[0].clientX : e.clientX);
+
+    const positionHands = (widthPercent) => {
+      if (!gestureZoom || !gestureZoom.line) return;
+      const lineWidthPx = (gestureZoom.line.clientWidth || window.innerWidth) * (widthPercent / 100);
+      const offset = lineWidthPx / 2;
+      const handHalf = (leftHand?.offsetWidth || 0) / 2;
+      const show = gestureZoom.showHands && widthPercent > 0;
+
+      if (leftHand && rightHand) {
+        leftHand.style.opacity = show ? '1' : '0';
+        rightHand.style.opacity = show ? '1' : '0';
+        leftHand.style.transform = `translate(calc(-50% - ${offset + handHalf * 0.1}px), 0)`;
+        rightHand.style.transform = `translate(calc(-50% + ${offset + handHalf * 2}px), 0)`;
+      }
+    };
+
+    const onPointerDown = (e) => {
+      gestureZoom.dragging = true;
+      gestureZoom.startX = getClientX(e);
+      gestureZoom.startValue = gestureZoom.value;
+      gestureZoom.manualOverride = true;
+      if (stopAutoZoomSync) stopAutoZoomSync(); // 자동 진행 연동 중단
+      if (videoContainer && videoContainer.videoElement) {
+        videoContainer.videoElement.pause();
+      }
+      if (videoContainer && videoContainer.videoElement) {
+        videoContainer.videoElement.pause(); // 수동 조작 시 영상 재생 멈춤
+      }
+      line.classList.add('dragging');
+      if (e.pointerId !== undefined && hit.setPointerCapture) {
+        hit.setPointerCapture(e.pointerId);
+      }
+      if (showGestureZoomOverlay) showGestureZoomOverlay();
+      e.preventDefault();
+    };
+
+    const onPointerMove = (e) => {
+      if (!gestureZoom.dragging) return;
+      gestureZoom.showHands = true;
+      const deltaX = getClientX(e) - gestureZoom.startX;
+      const width = line.clientWidth || window.innerWidth;
+      const deltaValue = (deltaX / width) * 200; // map to 0~200 range
+      setGestureZoomValue(gestureZoom.startValue + deltaValue);
+    };
+
+    const stopDrag = () => {
+      if (!gestureZoom.dragging) return;
+      gestureZoom.dragging = false;
+      line.classList.remove('dragging');
+      gestureZoom.showHands = false;
+      gestureZoom.manualOverride = false; // 드래그 종료 후 자동 진행도 동기화 허용
+      positionHands(parseFloat(lineCore.style.getPropertyValue('--line-width')) || 0);
+    };
+
+    hit.addEventListener('pointerdown', onPointerDown);
+    window.addEventListener('pointermove', onPointerMove);
+    window.addEventListener('pointerup', stopDrag);
+    window.addEventListener('pointercancel', stopDrag);
+
+    showGestureZoomOverlay = () => {
+      if (!gestureZoom) return;
+      gestureZoom.overlay.classList.add('active');
+      startIntroAnimation();
+      applyGestureZoomToVideo();
+    };
+
+    hideGestureZoomOverlay = (reset = false) => {
+      if (!gestureZoom) return;
+      gestureZoom.overlay.classList.remove('active');
+      if (reset && setGestureZoomValue) {
+        setGestureZoomValue(100);
+      }
+      gestureZoom.showHands = false;
+      gestureZoom.manualOverride = false;
+      if (gestureZoom.leftHand) gestureZoom.leftHand.style.opacity = '0';
+      if (gestureZoom.rightHand) gestureZoom.rightHand.style.opacity = '0';
+      if (stopAutoZoomSync) stopAutoZoomSync();
+    };
+
+    // 초기 상태
+    setGestureZoomValue(0);
+  }
+
+  function startIntroAnimation() {
+    if (!gestureZoom) return;
+    // 영상 진행도 기반으로 timeupdate에서 동기화하므로 여기서는 0으로 초기화만 수행
+    setGestureZoomValue(0);
+    if (gestureZoom.leftHand) gestureZoom.leftHand.style.opacity = '0';
+    if (gestureZoom.rightHand) gestureZoom.rightHand.style.opacity = '0';
+  }
+
+  function applyGestureZoomToVideo() {
+    if (!gestureZoom || !videoContainer || !videoContainer.videoElement) return;
+    // 100% 이하는 기본 스케일 유지, 100% 이상부터 추가 확대
+    const multiplier = Math.max(1, gestureZoom.value / 100);
+    const scale = BASE_VIDEO_SCALE * multiplier;
+    const videoEl = videoContainer.videoElement;
+    videoEl.style.transformOrigin = 'center center';
+    videoEl.style.transition = 'transform 0.08s linear';
+    videoEl.style.transform = `scale(${scale})`;
+  }
+
+  function resetVideoScale() {
+    if (videoContainer && videoContainer.videoElement) {
+      videoContainer.videoElement.style.transform = `scale(${BASE_VIDEO_SCALE})`;
+    }
+  }
+
+  function syncVideoTimeToValue() {
+    if (!gestureZoom || !videoContainer || !videoContainer.videoElement) return;
+    const videoEl = videoContainer.videoElement;
+    if (!videoEl.duration || videoEl.duration === Infinity) return;
+    const valueForPlayback = Math.max(0, Math.min(gestureZoom.value, 100)); // 재생 위치는 0~100%만 사용
+    const targetTime = (valueForPlayback / 100) * videoEl.duration;
+    videoEl.currentTime = targetTime;
+  }
+
+  function startAutoZoomSyncWithVideo() {
+    // 자동 동기화/자동재생 제거됨 (수동 조작 전용)
+    if (stopAutoZoomSync) stopAutoZoomSync();
+    stopAutoZoomSync = null;
   }
 
   // 탐색 이미지 뷰 기능

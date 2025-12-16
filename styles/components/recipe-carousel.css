@@ -225,7 +225,7 @@
 }
 
 .recipe-card-info.expanded .recipe-card-title {
-  font-size: 24px;
+  font-size: 20px;
   font-weight: 500;
   line-height: 1.4;
   margin: 0;
@@ -246,7 +246,7 @@
   background: transparent;
   border: none;
   box-shadow: none;
-  font-size: 16px;
+  font-size: 14px;
   font-weight: 400;
   margin-bottom: 10px;
   color: rgba(255, 255, 255, 0.8);
@@ -723,7 +723,7 @@
 
   .recipe-card-title {
     font-size: 24px;
-    font-weight: 300;
+    font-weight: 400;
   }
 
   .recipe-card-description {
