@@ -242,6 +242,7 @@
 
 @media (max-width: 480px) {
   .record-popup-card {
+    width: min(360px, 92vw);
     border-radius: 20px;
   }
   .record-popup-close {
