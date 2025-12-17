@@ -252,10 +252,12 @@
     padding: 0;
     flex-shrink: 0;
     background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.28);
   }
   .record-popup-close:hover,
   .record-popup-close:active {
     background: transparent;
+    border-color: rgba(255, 255, 255, 0.32);
   }
   .record-popup-body {
     padding: 12px 12px 10px;
