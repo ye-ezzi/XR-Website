@@ -240,7 +240,7 @@
   transform: translate(-50%, 0);
 }
 
-@media (max-width: 520px) {
+@media (max-width: 480px) {
   .record-popup-card {
     border-radius: 20px;
   }
