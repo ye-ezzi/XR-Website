@@ -120,6 +120,9 @@
   -webkit-backdrop-filter: blur(20px);
   border-radius: 24px;
   display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
   overflow: hidden;
   position: relative;
   cursor: pointer;
@@ -149,12 +152,11 @@
 }
 
 .recipe-image {
-  width: auto;
-  height: auto;
-  max-width: 200px;
-  max-height: 200px;
+  width: 180px;
+  height: 180px;
   object-fit: cover;
   flex-shrink: 0;
+  border-radius: 18px;
 }
 
 .recipe-content {
@@ -231,11 +233,13 @@
   .recipe-card {
     max-width: calc(100vw - 40px);
     min-width: 300px;
+    padding: 12px 14px;
   }
 
   .recipe-image {
-    max-width: 140px;
-    max-height: 140px;
+    width: 150px;
+    height: 150px;
+    border-radius: 16px;
   }
 
   .recipe-content {
@@ -287,11 +291,13 @@
   .recipe-card {
     max-width: calc(100vw - 32px);
     min-width: 280px;
+    padding: 10px 12px;
   }
 
   .recipe-image {
-    max-width: 110px;
-    max-height: 110px;
+    width: 130px;
+    height: 130px;
+    border-radius: 14px;
   }
 
   .recipe-content {

@@ -710,7 +710,7 @@ document.addEventListener('DOMContentLoaded', () => {
     overlay.className = 'zoom-gesture-overlay';
     overlay.innerHTML = `
       <div class="zoom-gesture-banner">
-        터치패드를 클릭 후 위 아래로 드래그해 확대/축소하세요.
+        터치패드를 클릭 후 좌 우로 드래그해 확대/축소하세요.
       </div>
       <div class="zoom-gesture-line">
         <div class="zoom-gesture-hands">

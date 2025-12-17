@@ -1,7 +1,7 @@
 .record-popup-card {
   position: relative;
   width: min(360px, 70vw);
-  border-radius: 28px;
+  border-radius: 20px;
   overflow: hidden;
   background: rgba(255, 255, 255, 0.14);
   backdrop-filter: blur(10px) saturate(160%);
@@ -37,6 +37,7 @@
   height: 16px;
   display: block;
   pointer-events: none;
+  filter: brightness(0) invert(1); /* ensure icon stays white on dark bg */
 }
 
 .record-popup-close::before {
@@ -120,7 +121,7 @@
 .record-popup-question {
   background: rgba(30, 31, 35, 0.316);
   color: #f3f3f3;
-  border-radius: 18px;
+  border-radius: 12px;
   padding: 0 0 12px 12px;
   display: flex;
   flex-direction: column;
@@ -170,7 +171,7 @@
   width: 100%;
   padding: 14px 16px;
   border: none;
-  border-radius: 18px;
+  border-radius: 12px;
   font-weight: 400;
   font-size: 16px;
   color: #fff;
@@ -188,7 +189,7 @@
   position: absolute;
   inset: 0;
   padding: 1px;
-  border-radius: 18px;
+  border-radius: 12px;
   background: linear-gradient(
     to bottom,
     rgba(255, 255, 255, 0.46),
@@ -212,14 +213,54 @@
   transform: translateY(0);
 }
 
+.record-toast {
+  position: fixed;
+  left: 50%;
+  bottom: calc(28px + env(safe-area-inset-bottom, 0px));
+  transform: translate(-50%, 16px);
+  padding: 12px 18px;
+  border-radius: 14px;
+  background: rgba(0, 0, 0, 0.7);
+  color: #fff;
+  font-size: 14px;
+  font-weight: 500;
+  backdrop-filter: blur(12px) saturate(150%);
+  -webkit-backdrop-filter: blur(12px) saturate(150%);
+  box-shadow:
+    0 12px 30px rgba(0, 0, 0, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.12);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.22s ease, transform 0.22s ease;
+  z-index: 3000;
+}
+
+.record-toast.visible {
+  opacity: 1;
+  transform: translate(-50%, 0);
+}
+
 @media (max-width: 520px) {
   .record-popup-card {
-    border-radius: 24px;
+    border-radius: 20px;
+  }
+  .record-popup-close {
+    width: 36px;
+    height: 36px;
+    aspect-ratio: 1 / 1;
+    padding: 0;
+    flex-shrink: 0;
   }
   .record-popup-body {
     padding: 12px 12px 10px;
   }
   .record-popup-question {
     border-radius: 16px;
+  }
+  .record-toast {
+    padding: 12px 16px;
+    border-radius: 12px;
+    font-size: 13px;
+    bottom: calc(22px + env(safe-area-inset-bottom, 0px));
   }
 }

@@ -9,6 +9,8 @@ export class FoodRecordPopup {
     this.textarea = null;
     this.stars = [];
     this.rating = 0;
+    this.toast = null;
+    this.toastTimeout = null;
     this.build();
   }
 
@@ -98,6 +100,7 @@ export class FoodRecordPopup {
 
     overlay.appendChild(card);
     document.body.appendChild(overlay);
+    this.createToast();
 
     overlay.addEventListener('click', (e) => {
       if (e.target === overlay) this.hide();
@@ -135,6 +138,7 @@ export class FoodRecordPopup {
     } else if (typeof window.saveRecord === 'function') {
       window.saveRecord();
     }
+    this.showToast('기록되었습니다');
   }
 
   show() {
@@ -151,5 +155,25 @@ export class FoodRecordPopup {
 
   getDescription() {
     return this.textarea?.value?.trim() || '';
+  }
+
+  createToast() {
+    const toast = document.createElement('div');
+    toast.className = 'record-toast';
+    toast.setAttribute('role', 'status');
+    toast.setAttribute('aria-live', 'polite');
+    document.body.appendChild(toast);
+    this.toast = toast;
+  }
+
+  showToast(message) {
+    if (!this.toast) this.createToast();
+    if (!this.toast) return;
+    this.toast.textContent = message;
+    this.toast.classList.add('visible');
+    clearTimeout(this.toastTimeout);
+    this.toastTimeout = setTimeout(() => {
+      this.toast?.classList.remove('visible');
+    }, 2000);
   }
 }
