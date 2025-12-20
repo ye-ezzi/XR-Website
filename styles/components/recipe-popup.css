@@ -297,9 +297,9 @@
   }
 
   .recipe-image {
-    width: 120px;
+    width: 80px;
     height: auto;
-    max-height: 120px;
+    max-height: 80px;
     border-radius: 14px;
   }
 
@@ -322,13 +322,19 @@
 
   /* 더 작은 모바일에서 약간 위로 올려 시인성 확보 */
   #microwavePopup {
-    left: 8%;
-    top: 10%;
+    left: 100%;
+    right: auto;
+    top: auto;
+    bottom: 22%;
+    transform: translateX(-50%);
   }
 
   #fridgePopup {
-    left: 10% !important;
-    top: 65% !important;
+    left: 6% !important;
+    right: auto !important;
+    top: auto !important;
+    bottom: 72% !important;
+    transform: translateX(0) !important;
   }
 
   .popup-indicator {
