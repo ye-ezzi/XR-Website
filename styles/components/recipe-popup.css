@@ -297,14 +297,14 @@
   }
 
   .recipe-image {
-    width: 80px;
+    width: 88px;
     height: auto;
-    max-height: 80px;
+    max-height: 88px;
     border-radius: 14px;
   }
 
   .recipe-content {
-    padding: 6px 8px;
+    padding: 6px 2px;
   }
 
   .recipe-title {
@@ -317,7 +317,7 @@
 
   .recipe-tag {
     padding: 4px 8px;
-    font-size: 10px;
+    font-size: 12px;
   }
 
   /* 더 작은 모바일에서 약간 위로 올려 시인성 확보 */
