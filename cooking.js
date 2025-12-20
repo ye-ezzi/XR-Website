@@ -273,6 +273,16 @@ document.addEventListener('DOMContentLoaded', () => {
     onSearch: () => {
       closeAllPopups();
       window.closeNutritionPopup?.();
+      // GLB 오버레이가 열려 있으면 닫기 (인터랙션 막는 것 방지)
+      if (glbOverlay) {
+        glbOverlay.classList.remove('active');
+      }
+      if (modelViewer && modelViewer.model) {
+        modelViewer.model.visible = false;
+      }
+      if (glassToggle && glassToggle.isChecked()) {
+        glassToggle.setChecked(false);
+      }
       window.showRecipeCarousel?.();
     }
   });
