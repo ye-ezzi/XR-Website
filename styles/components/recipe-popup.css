@@ -322,12 +322,13 @@
 
   /* 더 작은 모바일에서 약간 위로 올려 시인성 확보 */
   #microwavePopup {
-    top: 16%;
+    left: 8%;
+    top: 10%;
   }
 
   #fridgePopup {
-    left: 8% !important;
-    top: 44% !important;
+    left: 10% !important;
+    top: 65% !important;
   }
 
   .popup-indicator {
