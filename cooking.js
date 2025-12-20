@@ -3,6 +3,9 @@ import { VideoContainer } from './components/VideoContainer.js';
 import { RecipePopupManager, RecipePopup } from './components/RecipePopup.js';
 import { RecipeCarousel } from './components/RecipeCarousel.js';
 import { FoodRecordPopup } from './components/FoodRecordPopup.js';
+import { MeasurePopup } from './components/MeasurePopup.js';
+import { GlassToggle } from './components/GlassToggle.js';
+import { ModelViewer } from './main.js';
 
 console.log('Cooking mode loaded');
 
@@ -15,6 +18,10 @@ let gestureZoom;
 let setGestureZoomValue;
 let showGestureZoomOverlay;
 let hideGestureZoomOverlay;
+let measurePopup;
+let glassToggle;
+let modelViewer;
+let glbOverlay;
 const BASE_VIDEO_SCALE = 1.2;
 let stopAutoZoomSync;
 let autoZoomSyncedOnce = false;
@@ -24,6 +31,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // 비디오 컨테이너
   videoContainer = new VideoContainer('animation-container', () => {
     console.log('Explore video ended - showing recipe popups');
+    closeAllPopups();
     recipePopupManager.show('microwavePopup');
     recipePopupManager.show('fridgePopup');
   });
@@ -260,6 +268,57 @@ document.addEventListener('DOMContentLoaded', () => {
   });
   window.foodRecordPopup = foodRecordPopup;
 
+  // 측정하기 팝업 컴포넌트
+  measurePopup = new MeasurePopup({
+    onSearch: () => {
+      closeAllPopups();
+      window.closeNutritionPopup?.();
+      window.showRecipeCarousel?.();
+    }
+  });
+  window.measurePopup = measurePopup;
+
+  // 상단 고정 토글 초기화
+  const topToggleEl = document.getElementById('top-glass-toggle');
+  glbOverlay = document.getElementById('glb-viewer-overlay');
+  if (topToggleEl) {
+    glassToggle = new GlassToggle(topToggleEl, {
+      checked: false,
+      onChange: (val) => {
+        if (glbOverlay) {
+          glbOverlay.classList.toggle('active', val);
+        }
+        if (val) {
+          if (!modelViewer) {
+            modelViewer = new ModelViewer();
+            window.modelViewerInstance = modelViewer;
+            modelViewer.allowUserRotate = true;
+          } else if (modelViewer.model) {
+            modelViewer.model.visible = true;
+          }
+        } else if (modelViewer && modelViewer.model) {
+          modelViewer.model.visible = false;
+        }
+      }
+    });
+    window.glassToggle = glassToggle;
+  }
+
+  // GLB 오버레이 밖 클릭 시 닫기
+  if (glbOverlay) {
+    glbOverlay.addEventListener('click', (e) => {
+      if (e.target === glbOverlay) {
+        glbOverlay.classList.remove('active');
+        if (modelViewer && modelViewer.model) {
+          modelViewer.model.visible = false;
+        }
+        if (glassToggle) {
+          glassToggle.setChecked(false);
+        }
+      }
+    });
+  }
+
   // ========== 기존 코드 ==========
   const tabs = document.querySelectorAll('.bottom-bar-item');
   let measureAnimation = null;
@@ -383,6 +442,13 @@ document.addEventListener('DOMContentLoaded', () => {
       measureAnimation.destroy();
     }
 
+    if (measurePopup) {
+      measurePopup.hide();
+    }
+    if (window.hideScanImageView) {
+      window.hideScanImageView();
+    }
+
     // VideoContainer 컴포넌트를 사용하여 비디오 재생
     videoContainer.play('/videos/explore.mp4');
   };
@@ -394,10 +460,9 @@ document.addEventListener('DOMContentLoaded', () => {
       // 모든 팝업 닫기
       closeAllPopups();
 
-      // 측정 오버레이 닫기
-      const measureOverlay = document.getElementById('measure-overlay');
-      if (measureOverlay) {
-        measureOverlay.classList.remove('active');
+      // 측정 팝업 닫기
+      if (measurePopup) {
+        measurePopup.hide();
       }
 
       updateTabState(tab);
@@ -553,10 +618,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // 측정하기는 태그 오버레이 표시
     if (buttonAlt === 'Measure') {
-      const measureOverlay = document.getElementById('measure-overlay');
-      if (measureOverlay) {
-        measureOverlay.classList.add('active');
-        console.log('Showing measure tag overlay');
+      if (measurePopup) {
+        measurePopup.show();
+        console.log('Showing measure popup');
       }
       return;
     }
@@ -607,6 +671,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const fridgePopup = document.getElementById('fridgePopup');
     if (fridgePopup) {
       fridgePopup.style.display = 'none';
+    }
+
+    // 측정 팝업 닫기
+    if (measurePopup) {
+      measurePopup.hide();
     }
   }
 
@@ -710,7 +779,7 @@ document.addEventListener('DOMContentLoaded', () => {
     overlay.className = 'zoom-gesture-overlay';
     overlay.innerHTML = `
       <div class="zoom-gesture-banner">
-        터치패드를 클릭 후 좌 우로 드래그해 확대/축소하세요.
+        숫자 % 클릭 후 좌 우로 드래그해 확대/축소하세요.
       </div>
       <div class="zoom-gesture-line">
         <div class="zoom-gesture-hands">
@@ -956,6 +1025,9 @@ document.addEventListener('DOMContentLoaded', () => {
   // ========== Measure Tag 관련 함수 ==========
   window.showNutritionFromTag = function() {
     console.log('Showing nutrition from tag');
+    if (measurePopup) {
+      measurePopup.hide();
+    }
     const nutritionPopup = document.getElementById('nutrition-popup');
     if (nutritionPopup) {
       nutritionPopup.style.display = 'flex';

@@ -1,0 +1,95 @@
+.glass-toggle {
+  position: relative;
+  width: 64px;
+  height: 34px;
+  border-radius: 999px;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.26), rgba(255, 255, 255, 0.12));
+  backdrop-filter: blur(14px) saturate(160%);
+  -webkit-backdrop-filter: blur(14px) saturate(160%);
+  box-shadow:
+    0 8px 20px rgba(0, 0, 0, 0.18),
+    inset 0 1px 0 rgba(255, 255, 255, 0.4),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.16);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  padding: 4px;
+  gap: 8px;
+}
+
+.glass-toggle.floating {
+  position: fixed;
+  top: calc(14px + env(safe-area-inset-top, 0px));
+  right: calc(18px + env(safe-area-inset-right, 0px));
+  z-index: 2100;
+}
+
+.glass-toggle.disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.glass-toggle-track {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(120deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.02));
+  pointer-events: none;
+}
+
+.glass-toggle-thumb {
+  position: relative;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background:
+    radial-gradient(ellipse at 30% 30%, rgba(255, 255, 255, 0.6), transparent 55%),
+    linear-gradient(180deg, rgba(254, 254, 254, 0.95), rgba(255, 255, 255, 0.82));
+  box-shadow:
+    0 8px 18px rgba(75, 75, 75, 0.15),
+    inset 0 1px 0 rgba(255, 255, 255, 0.65),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.2);
+  transform: translateX(0);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+}
+
+.glass-toggle-thumb::after {
+  content: "";
+  position: absolute;
+  inset: 4px;
+  background: url('/images/glasses.png') center/contain no-repeat;
+  opacity: 0.9;
+  pointer-events: none;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.15));
+}
+
+.glass-toggle.checked {
+  background: linear-gradient(135deg, rgba(255, 153, 85, 0.73), rgba(255, 120, 40, 0.36));
+  box-shadow:
+    0 10px 26px rgba(255, 140, 60, 0.28),
+    inset 0 1px 0 rgba(255, 255, 255, 0.48),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.18);
+}
+
+.glass-toggle.checked .glass-toggle-thumb {
+  transform: translateX(28px);
+  background: linear-gradient(180deg, #f3c082, #ffa13c);
+  box-shadow:
+    0 10px 22px rgba(255, 141, 60, 0.119),
+    inset 0 1px 0 rgba(255, 255, 255, 0.65),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.22);
+}
+
+.glass-toggle:focus-visible {
+  outline: 2px solid rgba(255, 160, 80, 0.9);
+  outline-offset: 2px;
+}
+
+.glass-toggle-label {
+  margin-left: 10px;
+  color: #fff;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  user-select: none;
+}

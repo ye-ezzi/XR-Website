@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 
-class ModelViewer {
+export class ModelViewer {
   constructor() {
     this.scene = null;
     this.camera = null;
@@ -14,7 +14,7 @@ class ModelViewer {
     this.isAnimating = false; // 시작 버튼 애니메이션 중 여부
     this.isPanning = false; // 좌우 이동 중 여부
     this.fadeMaterials = []; // 페이드에 사용되는 머티리얼 목록
-    this.allowUserRotate = false; // 초기에는 사용자 회전 비활성화
+    this.allowUserRotate = true; // 기본적으로 사용자 회전 허용
     this.movementAnimation = null; // 좌우 움직임 시 Lottie 애니메이션
     this.preloadedAnimation = null; // 미리 로드된 Lottie 애니메이션
         
@@ -760,5 +760,7 @@ class ModelViewer {
   }
 }
 
-// 뷰어 인스턴스 생성
-new ModelViewer();
+// 뷰어 인스턴스 자동 생성 (viewer 요소가 있을 때만, 옵트아웃 가능)
+if (!window.__MODEL_VIEWER_DISABLE_AUTO_INIT && document.getElementById('viewer')) {
+  window.modelViewerInstance = new ModelViewer();
+}
