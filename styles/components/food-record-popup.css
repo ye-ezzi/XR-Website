@@ -58,7 +58,7 @@
 
 .record-popup-hero {
   width: 100%;
-  aspect-ratio: 4 / 2.8;
+  aspect-ratio: 4 / 3;
   object-fit: cover;
   display: block;
 }
@@ -242,12 +242,12 @@
 
 @media (max-width: 480px) {
   .record-popup-card {
-    width: min(400px, 92vw);
+    width: min(360px, 92vw);
     border-radius: 20px;
   }
   .record-popup-hero {
   width: 100%;
-  aspect-ratio: 4 / 2.8;
+  aspect-ratio: 4 / 2.7;
   object-fit: cover;
   display: block;
 }
@@ -257,22 +257,13 @@
     aspect-ratio: 1 / 1;
     padding: 0;
     flex-shrink: 0;
-    border-radius: 50%;
-    border: none;
-    background: rgba(0, 0, 0, 0.447);  /* 0.767 → 0.85로 변경 */
-    backdrop-filter: blur(10px) saturate(150%);
-    -webkit-backdrop-filter: blur(8px) saturate(150%);
-    color: #ffffff;  /* #000000 → #ffffff로 변경 (SVG 색상 영향) */
-    cursor: pointer;
-    display: grid;
-    place-items: center;
-    z-index: 2;
-    transition: all 0.2s ease;
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.28);
   }
   .record-popup-close:hover,
   .record-popup-close:active {
     background: transparent;
-    border-color: rgba(255, 255, 255, 0.197);
+    border-color: rgba(255, 255, 255, 0.32);
   }
   .record-popup-body {
     padding: 12px 12px 10px;
