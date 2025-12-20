@@ -322,7 +322,7 @@
 
   /* 더 작은 모바일에서 약간 위로 올려 시인성 확보 */
   #microwavePopup {
-    bottom: 4%;
+    bottom: 64%;
   }
 
   #fridgePopup {
