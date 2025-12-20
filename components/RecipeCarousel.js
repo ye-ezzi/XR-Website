@@ -23,6 +23,7 @@ export class RecipeCarousel {
    */
   setupEventListeners() {
     if (!this.cards) return;
+    this.initDragNavigation();
 
     // 카드 클릭 이벤트
     this.cards.forEach((card) => {
@@ -73,6 +74,61 @@ export class RecipeCarousel {
         }
       });
     });
+  }
+
+  /**
+   * 드래그(스와이프)로 캐러셀 이동
+   */
+  initDragNavigation() {
+    if (!this.track) return;
+
+    let isDragging = false;
+    let startX = 0;
+    let hasSwiped = false;
+    let pointerId = null;
+    const threshold = 45;
+
+    const onPointerDown = (e) => {
+      if (this.isAnimating) return;
+      isDragging = true;
+      hasSwiped = false;
+      startX = e.clientX;
+      pointerId = e.pointerId;
+      if (pointerId && this.track.setPointerCapture) {
+        this.track.setPointerCapture(pointerId);
+      }
+    };
+
+    const onPointerMove = (e) => {
+      if (!isDragging || hasSwiped) return;
+      const deltaX = e.clientX - startX;
+      if (Math.abs(deltaX) > threshold) {
+        if (deltaX < 0) {
+          this.next();
+        } else {
+          this.previous();
+        }
+        hasSwiped = true;
+      }
+    };
+
+    const endDrag = () => {
+      isDragging = false;
+      hasSwiped = false;
+      if (pointerId && this.track.releasePointerCapture) {
+        try {
+          this.track.releasePointerCapture(pointerId);
+        } catch (err) {
+          // ignore
+        }
+      }
+      pointerId = null;
+    };
+
+    this.track.addEventListener('pointerdown', onPointerDown);
+    window.addEventListener('pointermove', onPointerMove);
+    window.addEventListener('pointerup', endDrag);
+    window.addEventListener('pointercancel', endDrag);
   }
 
   /**
