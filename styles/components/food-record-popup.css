@@ -30,6 +30,9 @@
   place-items: center;
   z-index: 2;
   transition: all 0.2s ease;
+  box-shadow:
+    0 10px 24px rgba(0, 0, 0, 0.34),
+    0 1px 0 rgba(255, 255, 255, 0.14) inset;
 }
 
 .record-popup-close img {
@@ -242,7 +245,7 @@
 
 @media (max-width: 480px) {
   .record-popup-card {
-    width: min(360px, 92vw);
+    width: min(320px, 92vw);
     border-radius: 20px;
   }
   .record-popup-hero {
@@ -259,6 +262,7 @@
     flex-shrink: 0;
     background: transparent;
     border: 1px solid rgba(255, 255, 255, 0.28);
+    box-shadow: 0 6px 14px rgba(0, 0, 0, 0.3);
   }
   .record-popup-close:hover,
   .record-popup-close:active {
