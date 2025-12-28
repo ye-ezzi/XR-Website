@@ -6,7 +6,7 @@
   justify-content: center;
   z-index: 1800;
   background: rgba(0, 0, 0, 0.45);
-  padding: 14px;
+  padding: 18px;
 }
 
 .measure-popup-overlay.active {
@@ -14,11 +14,17 @@
 }
 
 .measure-popup-sheet {
-  width: min(400px);
+  --measure-sheet-width: 400px;
+  --measure-thumb-size: 80px;
+  --measure-row-gap: 4px;
+  --measure-body-gap: 10px;
+  --measure-button-radius: 14px;
+  --measure-button-line-radius: 16px;
+  width: min(var(--measure-sheet-width), 92vw);
   background: rgba(255, 255, 255, 0.12);
   border-radius: 24px;
   box-shadow:
-    0 28px 80px rgba(0, 0, 0, 0.32),
+    0 18px 80px rgba(0, 0, 0, 0.32),
     inset 0 1px 0 rgba(255, 255, 255, 0.25),
     inset 0 -1px 0 rgba(255, 255, 255, 0.08);
   position: relative;
@@ -26,7 +32,8 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 20px 20px;
+  gap: 12px;
+  padding: 16px 16px 18px;
   backdrop-filter: blur(24px) saturate(160%);
   -webkit-backdrop-filter: blur(24px) saturate(160%);
   border: 1px solid rgba(255, 255, 255, 0.22);
@@ -51,15 +58,14 @@
   width: 100%;
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 18px;
-  margin-bottom: 18px;
+  justify-content: flex-start;
+  gap: var(--measure-row-gap);
   color: #fff;
 }
 
 .measure-info-thumb {
-  width: 80px;
-  height: 80px;
+  width: var(--measure-thumb-size);
+  height: var(--measure-thumb-size);
   border-radius: 20px;
 }
 
@@ -73,14 +79,14 @@
   flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: var(--measure-body-gap);
 }
 
 .measure-info-top {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 12px;
+  gap: 10px;
 }
 
 .measure-info-name {
@@ -103,11 +109,12 @@
 
 .measure-popup-button {
   width: 100%;
-  padding: 14px 16px;
+  max-width: 360px;
+  padding: 16px 18px;
   border: none;
-  border-radius: 12px;
+  border-radius: var(--measure-button-radius);
   font-weight: 400;
-  font-size: 16px;
+  font-size: 17px;
   color: #fff;
   cursor: pointer;
   background: rgba(255, 140, 60, 0.55);
@@ -123,7 +130,7 @@
   position: absolute;
   inset: 0;
   padding: 1px;
-  border-radius: 12px;
+  border-radius: var(--measure-button-line-radius);
   background: linear-gradient(
     to bottom,
     rgba(255, 255, 255, 0.46),
@@ -149,48 +156,53 @@
 
 @media (max-width: 768px) {
   .measure-popup-sheet {
-    width: min(360px);
-    padding: 18px 18px;
+    --measure-sheet-width: 360px;
+    --measure-thumb-size: 64px;
+    --measure-row-gap: 8px;
+    --measure-body-gap: 8px;
+    padding: 14px 14px 16px;
     border-radius: 24px;
   }
 
-  .measure-info-thumb {
-    width: 80px;
-    height: 80px;
-  }
-
   .measure-info-name {
-    font-size: 20px;
+    font-size: 18px;
   }
 
   .measure-info-kcal {
-    font-size: 20px;
+    font-size: 18px;
   }
 
   .measure-info-weight {
     font-size: 16px;
   }
 
+  .measure-popup-button {
+    --measure-button-radius: 12px;
+    --measure-button-line-radius: 14px;
+    max-width: 340px;
+    padding: 14px 16px;
+    font-size: 16px;
+  }
 }
 
 @media (max-width: 480px) {
   .measure-popup-sheet {
-    width: min(360px);
-    padding: 14px 14px;
-    border-radius: 22px;
+    --measure-sheet-width: 320px;
+    --measure-thumb-size: 74px;
+    --measure-row-gap: 12px;
+    --measure-body-gap: 7px;
+    --measure-button-radius: 12px;
+    --measure-button-line-radius: 14px;
+    padding: 16px 14px 14px;
+    border-radius: 20px;
   }
 
   .measure-info-row {
-    gap: 10px;
-  }
-
-  .measure-info-thumb {
-    width: 80px;
-    height: 80px;
+    gap: 2px;
   }
 
   .measure-info-name {
-    font-size: 20px;
+    font-size: 18px;
   }
 
   .measure-info-kcal {
@@ -202,6 +214,9 @@
   }
 
   .measure-popup-button {
+    max-width: none;
     width: 100%;
+    padding: 14px 14px;
+    font-size: 15px;
   }
 }
