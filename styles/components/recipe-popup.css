@@ -118,11 +118,11 @@
   background: rgba(255, 255, 255, 0.08);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
-  border-radius: 16px;
+  border-radius: 20px;
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 14px 14px;
+  padding: 14px 18px;
   overflow: hidden;
   position: relative;
   cursor: pointer;
@@ -137,7 +137,7 @@
   content: '';
   position: absolute;
   inset: 0;
-  border-radius: 24px;
+  border-radius: 20px;
   padding: 1px;
   background: linear-gradient(135deg,
     rgba(255, 255, 255, 0.4) 0%,
@@ -152,9 +152,8 @@
 }
 
 .recipe-image {
-  width: 120px;
+  width: 110px;
   height: auto;
-  max-height: 120px;
   object-fit: cover;
   flex-shrink: 0;
   border-radius: 18px;
@@ -171,7 +170,7 @@
 }
 
 .recipe-title {
-  font-size: 22px;
+  font-size: 24px;
   font-weight: 600;
   color: #fff;
   margin: 0;
@@ -179,7 +178,7 @@
 }
 
 .recipe-subtitle {
-  font-size: 15px;
+  font-size: 18px;
   font-weight: 500;
   color: rgba(255, 255, 255, 0.8);
   margin: 2px 0 6px 0;
@@ -187,6 +186,7 @@
 }
 
 .recipe-tags {
+  font-size: 16px;
   display: flex;
   gap: 6px;
   flex-wrap: wrap;
@@ -234,31 +234,31 @@
   .recipe-card {
     max-width: calc(100vw - 40px);
     min-width: 300px;
-    padding: 12px 12px;
+    padding: 14px 14px;
   }
 
   .recipe-image {
-    width: 100px;
+    width: px;
     height: auto;
     max-height: 100px;
     border-radius: 16px;
   }
 
   .recipe-content {
-    padding: 8px 10px;
+    padding: 0px 10px;
   }
 
   .recipe-title {
-    font-size: 18px;
+    font-size: 22px;
   }
 
   .recipe-subtitle {
-    font-size: 13px;
+    font-size: 18px;
   }
 
   .recipe-tag {
     padding: 4px 9px;
-    font-size: 11px;
+    font-size: 16px;
   }
 
   /* 모바일: 팝업을 화면 하단 중앙으로 정렬 */
@@ -293,31 +293,31 @@
   .recipe-card {
     max-width: calc(100vw - 32px);
     min-width: 280px;
-    padding: 6px 10px;
+    padding: 12px 12px;
   }
 
   .recipe-image {
     width: 88px;
     height: auto;
     max-height: 88px;
-    border-radius: 14px;
+    border-radius: 16px;
   }
 
   .recipe-content {
-    padding: 6px 2px;
+    padding: 0px 2px;
   }
 
   .recipe-title {
-    font-size: 16px;
+    font-size: 20px;
   }
 
   .recipe-subtitle {
-    font-size: 12px;
+    font-size: 16px;
   }
 
   .recipe-tag {
     padding: 4px 8px;
-    font-size: 12px;
+    font-size: 13px;
   }
 
   /* 더 작은 모바일에서 약간 위로 올려 시인성 확보 */
