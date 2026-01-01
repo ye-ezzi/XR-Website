@@ -85,7 +85,6 @@ export class RecipeCarousel {
     let isDragging = false;
     let startX = 0;
     let hasSwiped = false;
-    let pointerId = null;
     const threshold = 45;
 
     const onPointerDown = (e) => {
@@ -93,10 +92,6 @@ export class RecipeCarousel {
       isDragging = true;
       hasSwiped = false;
       startX = e.clientX;
-      pointerId = e.pointerId;
-      if (pointerId && this.track.setPointerCapture) {
-        this.track.setPointerCapture(pointerId);
-      }
     };
 
     const onPointerMove = (e) => {
@@ -115,14 +110,6 @@ export class RecipeCarousel {
     const endDrag = () => {
       isDragging = false;
       hasSwiped = false;
-      if (pointerId && this.track.releasePointerCapture) {
-        try {
-          this.track.releasePointerCapture(pointerId);
-        } catch (err) {
-          // ignore
-        }
-      }
-      pointerId = null;
     };
 
     this.track.addEventListener('pointerdown', onPointerDown);
