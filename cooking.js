@@ -300,7 +300,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         if (val) {
           if (!modelViewer) {
-            modelViewer = new ModelViewer();
+            modelViewer = new ModelViewer('/models/ar.glb');
             window.modelViewerInstance = modelViewer;
             modelViewer.allowUserRotate = true;
           } else if (modelViewer.model) {

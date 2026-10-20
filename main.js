@@ -1,8 +1,10 @@
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 
+const DEFAULT_MODEL_URL = '/models/glasses_ver2.glb';
+
 export class ModelViewer {
-  constructor() {
+  constructor(modelUrl = DEFAULT_MODEL_URL) {
     this.scene = null;
     this.camera = null;
     this.renderer = null;
@@ -18,8 +20,10 @@ export class ModelViewer {
     this.movementAnimation = null; // 좌우 움직임 시 Lottie 애니메이션
     this.preloadedAnimation = null; // 미리 로드된 Lottie 애니메이션
         
+    this.tuneGlassesMaterials = modelUrl === DEFAULT_MODEL_URL; // 안경 모델 전용 머티리얼 튜닝 여부
+
     this.init();
-    this.loadGLBModel('/models/glasses_ver2.glb');
+    this.loadGLBModel(modelUrl);
   }
 
   init() {
@@ -531,9 +535,9 @@ export class ModelViewer {
             return;
           }
 
-          // 머티리얼 튜닝
+          // 머티리얼 튜닝 (안경 모델에만 적용, 다른 모델은 원본 질감 유지)
           const mat = child.material;
-          if (mat) {
+          if (mat && this.tuneGlassesMaterials) {
             const isLens = (mat.transparent && mat.opacity < 1.0) || isLensName;
             if (!isLens) {
               if (mat.metalness !== undefined) mat.metalness = 0.25;
