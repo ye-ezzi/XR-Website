@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
+import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment.js';
 
 const DEFAULT_MODEL_URL = '/models/glasses_ver2.glb';
 
@@ -20,7 +21,7 @@ export class ModelViewer {
     this.movementAnimation = null; // 좌우 움직임 시 Lottie 애니메이션
     this.preloadedAnimation = null; // 미리 로드된 Lottie 애니메이션
         
-    this.tuneGlassesMaterials = modelUrl === DEFAULT_MODEL_URL; // 안경 모델 전용 머티리얼 튜닝 여부
+    this.isGlassesModel = modelUrl === DEFAULT_MODEL_URL; // 홈 안경 모델 여부 (전용 회전/머티리얼 튜닝 적용)
 
     this.init();
     this.loadGLBModel(modelUrl);
@@ -44,7 +45,7 @@ export class ModelViewer {
       0.01,
       2000
     );
-    this.camera.position.set(0, 0, 10);
+    this.camera.position.set(0, 0, 100); // 직교 카메라라 크기는 그대로, 깊이가 긴 모델이 잘리지 않도록 뒤로 배치
     this.camera.lookAt(0, 0, 0);
 
     // Renderer 설정 (알파 활성화, 클리어 알파 0)
@@ -503,7 +504,11 @@ export class ModelViewer {
       (gltf) => {
         this.model = gltf.scene;
         this.adjustModelSize();
-        this.model.rotation.y = Math.PI;
+        if (this.isGlassesModel) {
+          this.model.rotation.y = Math.PI;
+        } else {
+          this.applyModelMaterials();
+        }
 
         // 프레임을 더 밝게: 렌즈는 제외 + HUD 패널 숨김 처리
         this.model.traverse((child) => {
@@ -537,7 +542,7 @@ export class ModelViewer {
 
           // 머티리얼 튜닝 (안경 모델에만 적용, 다른 모델은 원본 질감 유지)
           const mat = child.material;
-          if (mat && this.tuneGlassesMaterials) {
+          if (mat && this.isGlassesModel) {
             const isLens = (mat.transparent && mat.opacity < 1.0) || isLensName;
             if (!isLens) {
               if (mat.metalness !== undefined) mat.metalness = 0.25;
@@ -605,9 +610,19 @@ export class ModelViewer {
     const mobileScale = isMobile ? 1.0 : 1.0;
     
     this.model.scale.setScalar(scale * mobileScale);
-    const center = box.getCenter(new THREE.Vector3());
+    // 안경 모델은 기존 위치 유지, 그 외 모델은 스케일 적용 후 박스로 정확히 중앙 정렬
+    const center = this.isGlassesModel
+      ? box.getCenter(new THREE.Vector3())
+      : new THREE.Box3().setFromObject(this.model).getCenter(new THREE.Vector3());
     this.model.position.sub(center);
     this.model.position.y += 0.05;
+  }
+
+  // 안경 외 모델용: 금속 반사용 환경맵 (머티리얼은 모델 파일 설정 그대로 사용)
+  applyModelMaterials() {
+    const pmrem = new THREE.PMREMGenerator(this.renderer);
+    this.scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
+    pmrem.dispose();
   }
 
   frameModel() {
